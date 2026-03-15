@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gin Styles</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=Inter:wght@400;500;600;700&display=swap');
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'IM Fell English', serif;
+  background: #0D1F1A;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 32px 56px;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 20% 30%, rgba(201,168,76,0.04) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 70%, rgba(201,168,76,0.03) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.container {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 960px;
+}
+
+/* Header */
+.header {
+  text-align: center;
+  margin-bottom: 36px;
+}
+
+.title {
+  font-family: 'IM Fell English', serif;
+  font-size: 1.7rem;
+  color: #F2EFE8;
+  line-height: 1.2;
+  margin-bottom: 8px;
+}
+
+.subtitle {
+  font-family: 'IM Fell English', serif;
+  font-style: italic;
+  font-size: 0.8rem;
+  color: rgba(242,239,232,0.4);
+}
+
+/* ── GRID ── */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  position: relative;
+}
+
+/* Bottom row of 3 centred */
+.card:nth-child(5),
+.card:nth-child(6),
+.card:nth-child(7) {
+  grid-column: auto;
+}
+
+.grid-bottom {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-top: 16px;
+  max-width: 75%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* ── CARD ── */
+.card {
+  background: #F2EFE8;
+  border-radius: 8px;
+  padding: 28px 24px 24px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+  outline: none;
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(
+    0deg, transparent, transparent 28px,
+    rgba(58,84,56,0.04) 28px, rgba(58,84,56,0.04) 29px
+  );
+  pointer-events: none;
+}
+
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 32px rgba(0,0,0,0.3);
+}
+
+.card-num {
+  font-family: 'IM Fell English', serif;
+  font-style: italic;
+  font-size: 0.6rem;
+  color: #C9A84C;
+  opacity: 0.6;
+}
+
+.card-icon {
+  height: 52px;
+  display: flex;
+  align-items: center;
+}
+
+.card-name {
+  font-family: 'IM Fell English', serif;
+  font-size: 1.15rem;
+  color: #0D1F1A;
+  line-height: 1.2;
+}
+
+.card-tag {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.44rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #A8502A;
+  opacity: 0.6;
+}
+
+.card-hook {
+  font-family: 'IM Fell English', serif;
+  font-style: italic;
+  font-size: 0.75rem;
+  color: #3A5438;
+  opacity: 0.7;
+  line-height: 1.5;
+  margin-top: auto;
+}
+
+/* Hover cue */
+.card-cue {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.4rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #A8502A;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  margin-top: 4px;
+}
+.card:hover .card-cue { opacity: 0.5; }
+
+/* ── EXPANDED OVERLAY ── */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(13,31,26,0.85);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.overlay.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.expanded {
+  background: #F2EFE8;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 860px;
+  max-height: 88vh;
+  overflow-y: auto;
+  position: relative;
+  transform: scale(0.96);
+  transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  padding: 44px 48px 48px;
+}
+
+.overlay.visible .expanded {
+  transform: scale(1);
+}
+
+/* Parchment lines in expanded */
+.expanded::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(
+    0deg, transparent, transparent 28px,
+    rgba(58,84,56,0.04) 28px, rgba(58,84,56,0.04) 29px
+  );
+  pointer-events: none;
+  border-radius: 12px;
+}
+
+.expanded-inner { position: relative; z-index: 1; }
+
+/* Minimize button */
+.minimize-btn {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(13,31,26,0.08);
+  border: 1px solid rgba(13,31,26,0.14);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease;
+  z-index: 2;
+  outline: none;
+}
+.minimize-btn:hover { background: rgba(13,31,26,0.14); }
+.minimize-btn svg { pointer-events: none; }
+
+/* Expanded content */
+.exp-eyebrow {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.48rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.exp-title {
+  font-family: 'IM Fell English', serif;
+  font-size: 2rem;
+  color: #0D1F1A;
+  line-height: 1.15;
+  margin-bottom: 4px;
+}
+
+.exp-origin {
+  font-family: 'IM Fell English', serif;
+  font-style: italic;
+  font-size: 0.8rem;
+  color: #3A5438;
+  opacity: 0.7;
+  margin-bottom: 20px;
+}
+
+.exp-rule {
+  height: 1px;
+  background: rgba(201,168,76,0.35);
+  margin-bottom: 24px;
+}
+
+.exp-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px 36px;
+}
+
+.exp-label {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.46rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #A8502A;
+  margin-bottom: 6px;
+}
+
+.exp-val {
+  font-family: 'IM Fell English', serif;
+  font-size: 0.9rem;
+  color: #0D1F1A;
+  line-height: 1.7;
+}
+
+.exp-val.italic { font-style: italic; color: #3A5438; }
+
+.brand-tag {
+  display: inline-block;
+  background: rgba(13,31,26,0.07);
+  border: 1px solid rgba(13,31,26,0.14);
+  color: #0D1F1A;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.44rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 2px;
+  margin-right: 4px;
+  margin-bottom: 4px;
+}
+
+@media (max-width: 700px) {
+  .grid { grid-template-columns: repeat(2, 1fr); }
+  .grid-bottom { grid-template-columns: repeat(2, 1fr); max-width: 100%; }
+  .exp-grid { grid-template-columns: 1fr; }
+  .expanded { padding: 32px 24px 36px; }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <div class="header">
+    <h2 class="title">Six Styles. One Spirit.</h2>
+    <p class="subtitle">Select a style to learn what it is, how it tastes, and what to tell a client.</p>
+  </div>
+
+  <div class="grid" id="grid-top"></div>
+  <div class="grid-bottom" id="grid-bottom"></div>
+
+</div>
+
+<!-- Expanded overlay -->
+<div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-label="Gin style detail">
+  <div class="expanded" id="expandedCard">
+    <button class="minimize-btn" id="minimizeBtn" aria-label="Return to all styles">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M3 3L13 13M13 3L3 13" stroke="#0D1F1A" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+    </button>
+    <div class="expanded-inner" id="expandedInner"></div>
+  </div>
+</div>
+
+<script>
+const styles = [
+  {
+    id: 'london',
+    num: 'i.',
+    name: 'London Dry',
+    tag: 'The benchmark',
+    origin: 'England — produced worldwide',
+    accentColor: '#2A4A35',
+    hook: 'Juniper-forward, dry, and clean. The style most people picture when they think of gin.',
+    desc: 'The most widely produced and recognised gin style. No artificial flavourings — only natural botanicals added during distillation. Juniper must be the dominant flavour. Despite the name, London Dry can be made anywhere in the world.',
+    flavour: 'Juniper-forward, dry, crisp. Citrus and coriander in the back. Clean finish.',
+    client: '"This is the benchmark. Everything you taste is botanical — nothing added after distillation. Juniper leads, everything else supports."',
+    brands: ['Gordon\'s', 'Tanqueray', 'Beefeater', 'Sipsmith'],
+    icon: `<svg width="36" height="48" viewBox="0 0 64 80" fill="none">
+      <path d="M32 74 C32 58 31 40 32 20 C33 8 35 0 32 0" stroke="#3A5438" stroke-width="2" stroke-linecap="round"/>
+      <line x1="32" y1="44" x2="14" y2="30" stroke="#3A5438" stroke-width="1.6" stroke-linecap="round"/>
+      <line x1="32" y1="30" x2="50" y2="18" stroke="#3A5438" stroke-width="1.6" stroke-linecap="round"/>
+      <circle cx="10" cy="28" r="5.5" fill="#0D1F1A" stroke="#3A5438" stroke-width="1.2"/>
+      <circle cx="54" cy="16" r="5" fill="#0D1F1A" stroke="#3A5438" stroke-width="1.2"/>
+      <circle cx="32" cy="2" r="4.5" fill="#0D1F1A" stroke="#3A5438" stroke-width="1.2"/>
+    </svg>`,
+  },
+  {
+    id: 'oldtom',
+    num: 'ii.',
+    name: 'Old Tom',
+    tag: 'The sweet original',
+    origin: 'England — 18th century',
+    accentColor: '#A8502A',
+    hook: 'Sweeter and maltier than London Dry. Gin\'s older, richer ancestor.',
+    desc: 'A sweeter, older style of gin that predates London Dry. Originally made to mask the harshness of poorly distilled spirits, Old Tom is now crafted with care. Often uses licorice root for sweetness. Some expressions are lightly aged in casks.',
+    flavour: 'Sweeter than London Dry. Malty mouthfeel, licorice, gentle juniper, sometimes a hint of vanilla from aging.',
+    client: '"Think of it as gin\'s sweeter ancestor. Great for clients who find London Dry too dry — or who enjoy classic cocktails like the Tom Collins."',
+    brands: ['Hayman\'s Old Tom', 'Citadelle No Mistake', 'Jensen\'s Old Tom'],
+    icon: `<svg width="40" height="48" viewBox="0 0 64 72" fill="none">
+      <ellipse cx="32" cy="12" rx="18" ry="6" stroke="#3A5438" stroke-width="1.4" fill="none"/>
+      <ellipse cx="32" cy="60" rx="18" ry="6" stroke="#3A5438" stroke-width="1.4" fill="none"/>
+      <line x1="14" y1="12" x2="14" y2="60" stroke="#3A5438" stroke-width="1.4"/>
+      <line x1="50" y1="12" x2="50" y2="60" stroke="#3A5438" stroke-width="1.4"/>
+      <line x1="14" y1="36" x2="50" y2="36" stroke="#A8502A" stroke-width="1.2" opacity="0.6"/>
+      <path d="M18 12 C14 20 14 52 18 60" stroke="#3A5438" stroke-width="0.8" opacity="0.3"/>
+      <path d="M46 12 C50 20 50 52 46 60" stroke="#3A5438" stroke-width="0.8" opacity="0.3"/>
+    </svg>`,
+  },
+  {
+    id: 'plymouth',
+    num: 'iii.',
+    name: 'Plymouth',
+    tag: 'The geographic original',
+    origin: 'Plymouth, England — one distillery only',
+    accentColor: '#132318',
+    hook: 'Only one distillery in the world can make it. Earthy, dry, and distinctive.',
+    desc: 'A protected geographic designation — only Plymouth Gin Distillery in Plymouth, England can produce it. Drier than London Dry but with more earthiness. Uses seven botanicals including dried orange peels and orris root.',
+    flavour: 'Drier and earthier than London Dry. Slightly fruity from dried orange peel. Less juniper-forward, more rounded.',
+    client: '"Only one place in the world makes it. That exclusivity alone is a conversation starter — and the flavour backs it up."',
+    brands: ['Plymouth Gin', 'Plymouth Navy Strength'],
+    icon: `<svg width="36" height="48" viewBox="0 0 56 72" fill="none">
+      <circle cx="28" cy="16" r="7" stroke="#3A5438" stroke-width="1.4" fill="none"/>
+      <line x1="28" y1="23" x2="28" y2="56" stroke="#3A5438" stroke-width="1.4" stroke-linecap="round"/>
+      <line x1="14" y1="36" x2="42" y2="36" stroke="#3A5438" stroke-width="1.2"/>
+      <path d="M14 56 C16 50 14 46 14 40" stroke="#3A5438" stroke-width="1.1" fill="none" opacity="0.6"/>
+      <path d="M42 56 C40 50 42 46 42 40" stroke="#3A5438" stroke-width="1.1" fill="none" opacity="0.6"/>
+      <line x1="14" y1="56" x2="42" y2="56" stroke="#3A5438" stroke-width="1.3"/>
+    </svg>`,
+  },
+  {
+    id: 'contemporary',
+    num: 'iv.',
+    name: 'Contemporary',
+    tag: 'The modern expression',
+    origin: 'Global — no geographic restriction',
+    accentColor: '#3A5438',
+    hook: 'Juniper present but not dominant. The distiller\'s creative statement.',
+    desc: 'Also called New Western or International style. Juniper is present but no longer dominant — other botanicals take centre stage. Gins built around cucumber, rose, citrus, spice, and local botanicals from anywhere in the world.',
+    flavour: 'Highly variable. Botanical-forward, often floral or fruity. Juniper present but restrained. The distiller\'s creative statement.',
+    client: '"These gins are about the distiller\'s vision, not a recipe rule. If a client wants something unexpected, this is where to start."',
+    brands: ['Hendrick\'s', 'The Botanist', 'Monkey 47', 'Roku'],
+    icon: `<svg width="40" height="48" viewBox="0 0 64 64" fill="none">
+      <circle cx="32" cy="32" r="7" fill="#3A5438" opacity="0.5"/>
+      <ellipse cx="32" cy="18" rx="5" ry="9" fill="#3A5438" opacity="0.25"/>
+      <ellipse cx="32" cy="18" rx="5" ry="9" fill="#3A5438" opacity="0.25" transform="rotate(60 32 32)"/>
+      <ellipse cx="32" cy="18" rx="5" ry="9" fill="#3A5438" opacity="0.25" transform="rotate(120 32 32)"/>
+      <ellipse cx="32" cy="18" rx="5" ry="9" fill="#3A5438" opacity="0.25" transform="rotate(180 32 32)"/>
+      <ellipse cx="32" cy="18" rx="5" ry="9" fill="#3A5438" opacity="0.25" transform="rotate(240 32 32)"/>
+      <ellipse cx="32" cy="18" rx="5" ry="9" fill="#3A5438" opacity="0.25" transform="rotate(300 32 32)"/>
+    </svg>`,
+  },
+  {
+    id: 'genever',
+    num: 'v.',
+    name: 'Genever',
+    tag: 'The ancestor',
+    origin: 'Netherlands, Belgium, France, Germany',
+    accentColor: '#8B6914',
+    hook: 'Richer, maltier, more whisky-like. The spirit gin evolved from.',
+    desc: 'The Dutch and Belgian precursor to modern gin, dating back to the 16th century. Made from malt wine spirits rather than neutral grain spirit — which gives it a richer, more whisky-like base.',
+    flavour: 'Rich, earthy, malty. Savory and full-bodied. Juniper present but not dominant. More resembles whisky than modern gin.',
+    client: '"This is what gin was before London Dry existed. If a client is a whisky drinker curious about gin, Genever is the bridge."',
+    brands: ['Bols Genever', 'Damrak', 'Diep9'],
+    icon: `<svg width="32" height="48" viewBox="0 0 48 72" fill="none">
+      <path d="M24 8 C14 8 8 18 8 28 C8 40 14 52 24 60 C34 52 40 40 40 28 C40 18 34 8 24 8Z" stroke="#8B6914" stroke-width="1.4" fill="rgba(139,105,20,0.12)" opacity="0.8"/>
+      <line x1="24" y1="60" x2="18" y2="52" stroke="#3A5438" stroke-width="1.2" stroke-linecap="round" opacity="0.5"/>
+      <circle cx="24" cy="8" r="3" fill="#8B6914" opacity="0.5"/>
+    </svg>`,
+  },
+  {
+    id: 'japanese',
+    num: 'vi.',
+    name: 'Japanese',
+    tag: 'The craft expression',
+    origin: 'Japan',
+    accentColor: '#1A1A4A',
+    hook: 'Delicate, floral, and precise. Built from a completely different botanical vocabulary.',
+    desc: 'A rapidly growing style using native Japanese botanicals alongside juniper — sakura blossom, yuzu, sencha tea, sansho pepper, and hinoki cypress. Influenced by the Japanese craft tradition of precision and refinement.',
+    flavour: 'Delicate, floral, and precise. Citrus-forward from yuzu. Herbal and slightly spicy from sansho. Understated juniper.',
+    client: '"Japanese gin brings an entirely different botanical vocabulary. For a client who thinks they\'ve tried everything, this is the next conversation."',
+    brands: ['Roku', 'Nikka Coffey Gin', 'Ki No Bi', 'Suntory Haku'],
+    icon: `<svg width="40" height="48" viewBox="0 0 64 64" fill="none">
+      <circle cx="32" cy="32" r="4" fill="#1A1A4A" opacity="0.45"/>
+      <ellipse cx="32" cy="20" rx="4" ry="7" fill="#1A1A4A" opacity="0.25"/>
+      <ellipse cx="32" cy="20" rx="4" ry="7" fill="#1A1A4A" opacity="0.25" transform="rotate(72 32 32)"/>
+      <ellipse cx="32" cy="20" rx="4" ry="7" fill="#1A1A4A" opacity="0.25" transform="rotate(144 32 32)"/>
+      <ellipse cx="32" cy="20" rx="4" ry="7" fill="#1A1A4A" opacity="0.25" transform="rotate(216 32 32)"/>
+      <ellipse cx="32" cy="20" rx="4" ry="7" fill="#1A1A4A" opacity="0.25" transform="rotate(288 32 32)"/>
+      <line x1="32" y1="44" x2="28" y2="50" stroke="#1A1A4A" stroke-width="1" opacity="0.3" stroke-linecap="round"/>
+      <line x1="32" y1="44" x2="36" y2="50" stroke="#1A1A4A" stroke-width="1" opacity="0.3" stroke-linecap="round"/>
+    </svg>`,
+  },
+  {
+    id: 'navystrength',
+    num: 'vii.',
+    name: 'Navy Strength',
+    tag: 'The high-proof original',
+    origin: 'England — 18th century',
+    accentColor: '#0D1F1A',
+    hook: 'Minimum 57% ABV. Intense, fiery, and built for bold cocktails.',
+    desc: 'Navy Strength is defined purely by its ABV — a minimum of 57%. The name comes from the British Royal Navy, where gin stored on ships had to be at least this strength so that, if it spilled onto gunpowder, the powder would still ignite. It can be any style — London Dry, Contemporary, or otherwise — as long as it hits 57% or above.',
+    flavour: 'All the botanical character of its base style, but amplified. Spicier, more intense, more heat. The juniper and aromatics are more pronounced.',
+    client: '"It\'s not just stronger — the botanicals hit harder at 57%. A Navy Strength G&T is a completely different drink. Great for clients who want something with presence."',
+    brands: ['Plymouth Navy Strength', 'Sipsmith V.J.O.P.', 'Hayman\'s Royal Dock'],
+    icon: `<svg width="32" height="48" viewBox="0 0 48 72" fill="none">
+      <path d="M24 4 L28 28 L36 28 L24 68 L12 28 L20 28 Z" stroke="#0D1F1A" stroke-width="1.4" fill="rgba(13,31,26,0.1)" stroke-linejoin="round"/>
+      <line x1="16" y1="28" x2="32" y2="28" stroke="#C9A84C" stroke-width="1.2" opacity="0.7"/>
+      <text x="24" y="46" text-anchor="middle" font-family="Inter, sans-serif" font-size="8" font-weight="700" fill="#0D1F1A" opacity="0.5">57%</text>
+    </svg>`,
+  },
+];
+
+// Build grid cards — 4 top, 3 bottom
+const gridTop = document.getElementById('grid-top');
+const gridBottom = document.getElementById('grid-bottom');
+
+styles.forEach((s, i) => {
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.setAttribute('tabindex', '0');
+  card.setAttribute('role', 'button');
+  card.setAttribute('aria-label', `${s.name} — select to expand`);
+  card.innerHTML = `
+    <div class="card-num">${s.num}</div>
+    <div class="card-icon">${s.icon}</div>
+    <div class="card-name">${s.name}</div>
+    <div class="card-tag">${s.tag}</div>
+    <div class="card-hook">${s.hook}</div>
+    <div class="card-cue">Select to explore →</div>
+  `;
+  card.addEventListener('click', () => openStyle(s));
+  card.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ' ') { openStyle(s); e.preventDefault(); }
+  });
+  if (i < 4) gridTop.appendChild(card);
+  else gridBottom.appendChild(card);
+});
+
+// Overlay logic
+const overlay = document.getElementById('overlay');
+const expandedInner = document.getElementById('expandedInner');
+const minimizeBtn = document.getElementById('minimizeBtn');
+
+function openStyle(s) {
+  expandedInner.innerHTML = `
+    <div class="exp-eyebrow" style="color:${s.accentColor};">${s.tag}</div>
+    <div class="exp-title">${s.name}</div>
+    <div class="exp-origin">${s.origin}</div>
+    <div class="exp-rule"></div>
+    <div class="exp-grid">
+      <div>
+        <div class="exp-label">What it is</div>
+        <div class="exp-val">${s.desc}</div>
+      </div>
+      <div>
+        <div class="exp-label">Flavour profile</div>
+        <div class="exp-val">${s.flavour}</div>
+        <div class="exp-label" style="margin-top:18px;">What to tell a client</div>
+        <div class="exp-val italic">${s.client}</div>
+        <div class="exp-label" style="margin-top:18px;">Brand examples</div>
+        <div class="exp-val">${s.brands.map(b => `<span class="brand-tag">${b}</span>`).join('')}</div>
+      </div>
+    </div>
+  `;
+  overlay.classList.add('visible');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeOverlay() {
+  overlay.classList.remove('visible');
+  document.body.style.overflow = '';
+}
+
+minimizeBtn.addEventListener('click', closeOverlay);
+overlay.addEventListener('click', e => {
+  if (e.target === overlay) closeOverlay();
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeOverlay();
+});
+</script>
+</body>
+</html>
