@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Design Your Own Gin</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=Inter:wght@400;500;600;700&display=swap');
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'IM Fell English', serif;
+  background: #0D1F1A;
+  min-height: 100vh;
+  padding: 48px 32px 72px;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 15% 25%, rgba(201,168,76,0.05) 0%, transparent 50%),
+    radial-gradient(ellipse at 85% 75%, rgba(201,168,76,0.04) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.container {
+  position: relative;
+  z-index: 1;
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+/* Header */
+.header {
+  text-align: center;
+  margin-bottom: 48px;
+}
+
+.header-eyebrow {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.52rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #C9A84C;
+  opacity: 0.6;
+  margin-bottom: 12px;
+}
+
+.header-title {
+  font-family: 'IM Fell English', serif;
+  font-size: 2rem;
+  color: #F2EFE8;
+  line-height: 1.2;
+  margin-bottom: 10px;
+}
+
+.header-sub {
+  font-family: 'IM Fell English', serif;
+  font-style: italic;
+  font-size: 0.82rem;
+  color: rgba(242,239,232,0.45);
+  line-height: 1.6;
+}
+
+/* Gold rule */
+.rule {
+  height: 1px;
+  background: linear-gradient(to right, transparent, rgba(201,168,76,0.25), transparent);
+  margin: 0 auto 40px;
+  max-width: 400px;
+}
+
+/* Accordion steps */
+.steps { display: flex; flex-direction: column; gap: 12px; }
+
+.step {
+  border: 1px solid rgba(242,239,232,0.1);
+  border-radius: 8px;
+  overflow: hidden;
+  transition: border-color 0.2s ease;
+}
+
+.step.active { border-color: rgba(201,168,76,0.35); }
+.step.complete { border-color: rgba(201,168,76,0.2); }
+
+/* Step header */
+.step-header {
+  padding: 18px 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: rgba(242,239,232,0.04);
+  cursor: default;
+}
+
+.step.active .step-header { background: rgba(242,239,232,0.06); }
+.step.complete .step-header { cursor: pointer; }
+.step.complete .step-header:hover { background: rgba(242,239,232,0.07); }
+
+.step-num {
+  font-family: 'IM Fell English', serif;
+  font-style: italic;
+  font-size: 0.7rem;
+  color: #C9A84C;
+  opacity: 0.55;
+  width: 20px;
+  flex-shrink: 0;
+}
+
+.step-title {
+  font-family: 'IM Fell English', serif;
+  font-size: 1rem;
+  color: rgba(242,239,232,0.6);
+  flex: 1;
+}
+
+.step.active .step-title { color: #F2EFE8; }
+.step.complete .step-title { color: rgba(242,239,232,0.75); }
+
+.step-check {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1px solid rgba(201,168,76,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.step.complete .step-check { opacity: 1; }
+
+.step-selection {
+  font-family: 'IM Fell English', serif;
+  font-style: italic;
+  font-size: 0.72rem;
+  color: #C9A84C;
+  opacity: 0.7;
+  margin-left: 4px;
+}
+
+/* Step body */
+.step-body {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s cubic-bezier(0.4,0,0.2,1);
+}
+
+.step.active .step-body { max-height: 800px; }
+
+.step-body-inner {
+  padding: 24px 24px 28px;
+  border-top: 1px solid rgba(242,239,232,0.06);
+}
+
+.step-instruction {
+  font-family: 'IM Fell English', serif;
+  font-style: italic;
+  font-size: 0.78rem;
+  color: rgba(242,239,232,0.45);
+  margin-bottom: 20px;
+  line-height: 1.6;
+}
+
+/* Base spirit options */
+.base-options {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.base-option {
+  border: 1px solid rgba(242,239,232,0.12);
+  border-radius: 6px;
+  padding: 16px 18px;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+  outline: none;
+}
+
+.base-option:hover { border-color: rgba(201,168,76,0.35); background: rgba(242,239,232,0.04); }
+.base-option.selected { border-color: #C9A84C; background: rgba(201,168,76,0.08); }
+
+.base-name {
+  font-family: 'IM Fell English', serif;
+  font-size: 0.95rem;
+  color: #F2EFE8;
+  margin-bottom: 4px;
+}
+
+.base-note {
+  font-family: 'IM Fell English', serif;
+  font-style: italic;
+  font-size: 0.7rem;
+  color: rgba(242,239,232,0.45);
+  line-height: 1.5;
+}
+
+/* Botanical grid */
+.botanical-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.bot-option {
+  border: 1px solid rgba(242,239,232,0.12);
+  border-radius: 6px;
+  padding: 12px 14px;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+  outline: none;
+  text-align: left;
+}
+
+.bot-option:hover { border-color: rgba(201,168,76,0.35); background: rgba(242,239,232,0.04); }
+.bot-option.selected { border-color: #C9A84C; background: rgba(201,168,76,0.08); }
+.bot-option.locked { border-color: rgba(201,168,76,0.4); background: rgba(201,168,76,0.06); cursor: default; }
+
+.bot-name {
+  font-family: 'IM Fell English', serif;
+  font-size: 0.82rem;
+  color: #F2EFE8;
+  margin-bottom: 2px;
+}
+
+.bot-option.locked .bot-name { color: #C9A84C; }
+
+.bot-note {
+  font-family: 'IM Fell English', serif;
+  font-style: italic;
+  font-size: 0.62rem;
+  color: rgba(242,239,232,0.38);
+  line-height: 1.4;
+}
+
+.bot-count {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.48rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(242,239,232,0.3);
+  margin-bottom: 12px;
+}
+
+.bot-count.ok { color: #C9A84C; opacity: 0.7; }
+
+/* Name input */
+.name-wrap { margin-bottom: 4px; }
+
+.gin-name-input {
+  width: 100%;
+  background: rgba(242,239,232,0.06);
+  border: 1px solid rgba(242,239,232,0.15);
+  border-radius: 6px;
+  padding: 14px 18px;
+  font-family: 'IM Fell English', serif;
+  font-size: 1rem;
+  color: #F2EFE8;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.gin-name-input::placeholder { color: rgba(242,239,232,0.25); font-style: italic; }
+.gin-name-input:focus { border-color: rgba(201,168,76,0.45); }
+
+/* Continue button */
+.btn-continue {
+  margin-top: 20px;
+  padding: 12px 28px;
+  background: rgba(201,168,76,0.15);
+  border: 1px solid rgba(201,168,76,0.4);
+  border-radius: 4px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.52rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #C9A84C;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease;
+  display: block;
+  width: 100%;
+}
+
+.btn-continue:hover { background: rgba(201,168,76,0.22); border-color: rgba(201,168,76,0.6); }
+.btn-continue:disabled { opacity: 0.3; cursor: not-allowed; }
+
+/* Result card */
+.result {
+  margin-top: 24px;
+  background: #F2EFE8;
+  border-radius: 8px;
+  padding: 36px 32px 40px;
+  display: none;
+  position: relative;
+  overflow: hidden;
+}
+
+.result::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(
+    0deg, transparent, transparent 28px,
+    rgba(58,84,56,0.04) 28px, rgba(58,84,56,0.04) 29px
+  );
+  pointer-events: none;
+}
+
+.result-inner { position: relative; z-index: 1; }
+
+.result-eyebrow {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.46rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #A8502A;
+  margin-bottom: 6px;
+}
+
+.result-gin-name {
+  font-family: 'IM Fell English', serif;
+  font-size: 1.8rem;
+  color: #0D1F1A;
+  line-height: 1.2;
+  margin-bottom: 4px;
+}
+
+.result-style {
+  font-family: 'IM Fell English', serif;
+  font-style: italic;
+  font-size: 0.82rem;
+  color: #3A5438;
+  margin-bottom: 20px;
+}
+
+.result-rule {
+  height: 1px;
+  background: rgba(201,168,76,0.3);
+  margin-bottom: 20px;
+}
+
+.result-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px 32px;
+  margin-bottom: 20px;
+}
+
+.r-label {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.44rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #A8502A;
+  margin-bottom: 6px;
+}
+
+.r-val {
+  font-family: 'IM Fell English', serif;
+  font-size: 0.85rem;
+  color: #0D1F1A;
+  line-height: 1.6;
+}
+
+.r-val.italic { font-style: italic; color: #3A5438; }
+
+.result-match-box {
+  background: rgba(13,31,26,0.06);
+  border-left: 3px solid #A8502A;
+  border-radius: 0 6px 6px 0;
+  padding: 14px 16px;
+  margin-top: 4px;
+}
+
+.result-match-box .r-label { color: #A8502A; }
+
+.screenshot-hint {
+  font-family: 'IM Fell English', serif;
+  font-style: italic;
+  font-size: 0.7rem;
+  color: rgba(13,31,26,0.4);
+  text-align: center;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(201,168,76,0.15);
+}
+
+.btn-reset {
+  margin-top: 12px;
+  padding: 10px 24px;
+  background: transparent;
+  border: 1px solid rgba(13,31,26,0.18);
+  border-radius: 4px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.48rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(13,31,26,0.45);
+  cursor: pointer;
+  display: block;
+  width: 100%;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.btn-reset:hover { border-color: rgba(13,31,26,0.35); color: rgba(13,31,26,0.7); }
+
+@media (max-width: 560px) {
+  .base-options { grid-template-columns: 1fr; }
+  .botanical-grid { grid-template-columns: repeat(2, 1fr); }
+  .result-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <div class="header">
+    <div class="header-eyebrow">Chapter 4 Exercise</div>
+    <h2 class="header-title">Design Your Own Gin</h2>
+    <p class="header-sub">Make two choices, name your gin, and discover which style your instincts lean toward.</p>
+  </div>
+
+  <div class="rule"></div>
+
+  <div class="steps">
+
+    <!-- Step 1: Base Spirit -->
+    <div class="step active" id="step1">
+      <div class="step-header">
+        <div class="step-num">i.</div>
+        <div class="step-title">Choose your base spirit</div>
+        <div class="step-check">
+          <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+            <path d="M1 4L3.5 6.5L9 1" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="step-selection" id="base-selection"></div>
+      </div>
+      <div class="step-body">
+        <div class="step-body-inner">
+          <p class="step-instruction">Your base spirit is the canvas. It's almost flavourless at 96% ABV — but the grain used still influences the mouthfeel and very subtle character of the finished gin.</p>
+          <div class="base-options">
+            <div class="base-option" tabindex="0" data-base="Wheat" onclick="selectBase(this)">
+              <div class="base-name">Wheat</div>
+              <div class="base-note">Smooth and light. The most common base for London Dry gins. Clean, neutral, lets botanicals lead.</div>
+            </div>
+            <div class="base-option" tabindex="0" data-base="Corn" onclick="selectBase(this)">
+              <div class="base-name">Corn</div>
+              <div class="base-note">Slightly sweet on the palate. Common in American gins. Adds a soft, rounded quality.</div>
+            </div>
+            <div class="base-option" tabindex="0" data-base="Barley" onclick="selectBase(this)">
+              <div class="base-name">Barley</div>
+              <div class="base-note">Malty and earthy. Closer to Genever in character. Adds weight and complexity.</div>
+            </div>
+            <div class="base-option" tabindex="0" data-base="Grape" onclick="selectBase(this)">
+              <div class="base-name">Grape</div>
+              <div class="base-note">Smooth and slightly fruity. Popular in Mediterranean gins. Adds a subtle wine-like softness.</div>
+            </div>
+          </div>
+          <button class="btn-continue" id="btn1" disabled onclick="nextStep(1)">Continue →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 2: Botanicals -->
+    <div class="step" id="step2">
+      <div class="step-header">
+        <div class="step-num">ii.</div>
+        <div class="step-title">Choose your botanicals</div>
+        <div class="step-check">
+          <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+            <path d="M1 4L3.5 6.5L9 1" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="step-selection" id="bot-selection"></div>
+      </div>
+      <div class="step-body">
+        <div class="step-body-inner">
+          <p class="step-instruction">Juniper is required — it's locked in. Choose 3 to 5 more botanicals to build your flavour profile.</p>
+          <div class="bot-count" id="bot-count">0 of 5 selected (choose 3–5)</div>
+          <div class="botanical-grid">
+            <div class="bot-option locked" tabindex="-1">
+              <div class="bot-name">Juniper ✦</div>
+              <div class="bot-note">Pine, resinous, earthy — the soul of gin</div>
+            </div>
+            <div class="bot-option" tabindex="0" data-bot="Coriander" data-weight="london" onclick="toggleBot(this)">
+              <div class="bot-name">Coriander Seed</div>
+              <div class="bot-note">Citrus, spice, sage</div>
+            </div>
+            <div class="bot-option" tabindex="0" data-bot="Angelica Root" data-weight="london" onclick="toggleBot(this)">
+              <div class="bot-name">Angelica Root</div>
+              <div class="bot-note">Earthy, herbal, binding</div>
+            </div>
+            <div class="bot-option" tabindex="0" data-bot="Citrus Peel" data-weight="london" onclick="toggleBot(this)">
+              <div class="bot-name">Citrus Peel</div>
+              <div class="bot-note">Bright, fresh, zesty</div>
+            </div>
+            <div class="bot-option" tabindex="0" data-bot="Orris Root" data-weight="london" onclick="toggleBot(this)">
+              <div class="bot-name">Orris Root</div>
+              <div class="bot-note">Floral, violet, fixative</div>
+            </div>
+            <div class="bot-option" tabindex="0" data-bot="Cardamom" data-weight="london" onclick="toggleBot(this)">
+              <div class="bot-name">Cardamom</div>
+              <div class="bot-note">Spice, eucalyptus, warm</div>
+            </div>
+            <div class="bot-option" tabindex="0" data-bot="Cinnamon" data-weight="london" onclick="toggleBot(this)">
+              <div class="bot-name">Cinnamon</div>
+              <div class="bot-note">Warm, sweet spice</div>
+            </div>
+            <div class="bot-option" tabindex="0" data-bot="Liquorice Root" data-weight="oldtom" onclick="toggleBot(this)">
+              <div class="bot-name">Liquorice Root</div>
+              <div class="bot-note">Sweet, anise, soft</div>
+            </div>
+            <div class="bot-option" tabindex="0" data-bot="Cucumber" data-weight="contemporary" onclick="toggleBot(this)">
+              <div class="bot-name">Cucumber</div>
+              <div class="bot-note">Cool, fresh, delicate</div>
+            </div>
+            <div class="bot-option" tabindex="0" data-bot="Rose Petal" data-weight="contemporary" onclick="toggleBot(this)">
+              <div class="bot-name">Rose Petal</div>
+              <div class="bot-note">Floral, perfumed, soft</div>
+            </div>
+            <div class="bot-option" tabindex="0" data-bot="Green Tea" data-weight="japanese" onclick="toggleBot(this)">
+              <div class="bot-name">Green Tea</div>
+              <div class="bot-note">Grassy, umami, delicate</div>
+            </div>
+            <div class="bot-option" tabindex="0" data-bot="Sansho Pepper" data-weight="japanese" onclick="toggleBot(this)">
+              <div class="bot-name">Sansho Pepper</div>
+              <div class="bot-note">Citrus, tingly spice</div>
+            </div>
+          </div>
+          <button class="btn-continue" id="btn2" disabled onclick="nextStep(2)">Continue →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 3: Name your gin -->
+    <div class="step" id="step3">
+      <div class="step-header">
+        <div class="step-num">iii.</div>
+        <div class="step-title">Name your gin</div>
+        <div class="step-check">
+          <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+            <path d="M1 4L3.5 6.5L9 1" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+      </div>
+      <div class="step-body">
+        <div class="step-body-inner">
+          <p class="step-instruction">Every gin needs a name. What would you call yours?</p>
+          <div class="name-wrap">
+            <input type="text" class="gin-name-input" id="ginName" placeholder="e.g. Field Notes No. 1" maxlength="40"
+              oninput="checkName()"/>
+          </div>
+          <button class="btn-continue" id="btn3" disabled onclick="showResult()">See your gin →</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Result card -->
+  <div class="result" id="result">
+    <div class="result-inner" id="resultInner"></div>
+  </div>
+
+</div>
+
+<script>
+let selectedBase = null;
+let selectedBots = [];
+const MAX_BOTS = 5;
+const MIN_BOTS = 3;
+
+// Style matching logic
+const styleMatches = {
+  wheat: {
+    london: { style: 'London Dry', reason: 'Wheat base with classic botanicals is the blueprint for London Dry — clean, crisp, and juniper-forward.', brand: 'Tanqueray or Beefeater' },
+    contemporary: { style: 'Contemporary', reason: 'A wheat base keeps things light enough to let the more unusual botanicals express themselves cleanly.', brand: 'Hendrick\'s or The Botanist' },
+    oldtom: { style: 'Old Tom', reason: 'The smooth wheat base softens the sweetness of liquorice and plays well with the Old Tom style\'s rounded character.', brand: 'Hayman\'s Old Tom' },
+    japanese: { style: 'Japanese', reason: 'Wheat\'s clean neutrality lets the delicate Japanese botanicals — yuzu, green tea, sansho — come through with precision.', brand: 'Roku or Ki No Bi' },
+  },
+  corn: {
+    london: { style: 'American Dry', reason: 'Corn base with classic botanicals is the American take on London Dry — all the structure, with a slightly sweeter foundation.', brand: 'Aviation or St. George Terroir' },
+    contemporary: { style: 'New Western', reason: 'Corn\'s soft sweetness pairs naturally with more expressive, botanical-forward contemporary styles.', brand: 'Hendrick\'s or Monkey 47' },
+    oldtom: { style: 'Old Tom', reason: 'Corn\'s natural sweetness makes it an ideal base for Old Tom — the liquorice and soft botanicals amplify that character beautifully.', brand: 'Ransom Old Tom' },
+    japanese: { style: 'Contemporary', reason: 'Corn softens the edge of the more unusual botanicals, pointing toward a contemporary style with an exotic lean.', brand: 'The Botanist' },
+  },
+  barley: {
+    london: { style: 'Genever-influenced', reason: 'Barley base with earthy botanicals takes you back to gin\'s origins — rich, malty, and complex. Closer to Genever than London Dry.', brand: 'Bols Genever or Diep9' },
+    contemporary: { style: 'Aged or Barrel-Influenced', reason: 'The malty character of barley with expressive botanicals creates a gin that would benefit from barrel ageing — a rich, complex style.', brand: 'Citadelle Réserve' },
+    oldtom: { style: 'Old Tom', reason: 'Barley\'s malt character and Old Tom\'s sweetness are natural companions — this combination would produce a rich, whisky-like Old Tom.', brand: 'Jensen\'s Old Tom' },
+    japanese: { style: 'Hybrid', reason: 'Barley\'s earthy weight against delicate Japanese botanicals creates an intriguing tension — complex and unlike anything standard.', brand: 'Nikka Coffey Gin' },
+  },
+  grape: {
+    london: { style: 'Mediterranean Dry', reason: 'Grape base with classic botanicals is the hallmark of southern European gins — floral, soft, and elegant with a London Dry backbone.', brand: 'G\'Vine Floraison' },
+    contemporary: { style: 'Contemporary', reason: 'Grape\'s fruity softness amplifies floral and fresh botanicals — a natural pairing for a contemporary, botanical-led style.', brand: 'The Botanist or Caorunn' },
+    oldtom: { style: 'Old Tom', reason: 'Grape\'s natural sugars and the sweetness of Old Tom botanicals create a particularly smooth, almost wine-like gin expression.', brand: 'Citadelle No Mistake Old Tom' },
+    japanese: { style: 'Contemporary Floral', reason: 'Grape and Japanese botanicals produce something delicate and layered — closer to a perfume than a traditional gin, in the best way.', brand: 'Ki No Bi Sei' },
+  },
+};
+
+function getStyleWeight(bots) {
+  const weights = { london: 0, contemporary: 0, oldtom: 0, japanese: 0 };
+  bots.forEach(b => {
+    const el = document.querySelector(`[data-bot="${b}"]`);
+    if (el) {
+      const w = el.dataset.weight;
+      if (weights[w] !== undefined) weights[w]++;
+    }
+  });
+  return Object.entries(weights).sort((a,b) => b[1]-a[1])[0][0];
+}
+
+function selectBase(el) {
+  document.querySelectorAll('.base-option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedBase = el.dataset.base;
+  document.getElementById('btn1').disabled = false;
+}
+
+function toggleBot(el) {
+  if (el.classList.contains('locked')) return;
+  if (el.classList.contains('selected')) {
+    el.classList.remove('selected');
+    selectedBots = selectedBots.filter(b => b !== el.dataset.bot);
+  } else {
+    if (selectedBots.length >= MAX_BOTS) return;
+    el.classList.add('selected');
+    selectedBots.push(el.dataset.bot);
+  }
+  updateBotCount();
+}
+
+function updateBotCount() {
+  const n = selectedBots.length;
+  const el = document.getElementById('bot-count');
+  el.textContent = `${n} of ${MAX_BOTS} selected (choose ${MIN_BOTS}–${MAX_BOTS})`;
+  el.className = 'bot-count' + (n >= MIN_BOTS ? ' ok' : '');
+  document.getElementById('btn2').disabled = n < MIN_BOTS;
+}
+
+function nextStep(from) {
+  const current = document.getElementById(`step${from}`);
+  const next = document.getElementById(`step${from+1}`);
+  current.classList.remove('active');
+  current.classList.add('complete');
+
+  if (from === 1) {
+    document.getElementById('base-selection').textContent = selectedBase;
+  }
+  if (from === 2) {
+    document.getElementById('bot-selection').textContent = selectedBots.slice(0,2).join(', ') + (selectedBots.length > 2 ? '…' : '');
+  }
+
+  if (next) {
+    next.classList.add('active');
+    // Allow clicking completed steps to review
+    current.querySelector('.step-header').addEventListener('click', () => {
+      if (current.classList.contains('complete')) {
+        current.classList.toggle('active');
+      }
+    });
+  }
+}
+
+function checkName() {
+  const val = document.getElementById('ginName').value.trim();
+  document.getElementById('btn3').disabled = val.length < 2;
+}
+
+function getProductionMethod(bots) {
+  const delicate = ['Cucumber', 'Rose Petal', 'Green Tea', 'Sansho Pepper'];
+  const sweet = ['Liquorice Root'];
+  const delicateCount = bots.filter(b => delicate.includes(b)).length;
+  const sweetCount = bots.filter(b => sweet.includes(b)).length;
+
+  if (delicateCount >= 2) return {
+    method: 'Vapour Infusion',
+    reason: 'Your delicate botanicals — ' + bots.filter(b => delicate.includes(b)).join(' and ') + ' — would benefit from vapour infusion. Direct immersion in hot spirit would overwhelm them. Passing vapour through a basket extracts their character more gently and cleanly.'
+  };
+  if (sweetCount >= 1) return {
+    method: 'Pot Still Distillation',
+    reason: 'Liquorice root and sweeter botanicals extract beautifully in a pot still, where the slower distillation draws out their full character. A pot still also suits the richer, more rounded style your choices point toward.'
+  };
+  return {
+    method: 'Pot Still Distillation',
+    reason: 'Your botanical selection — classic, aromatic, and well-structured — is well suited to pot still distillation. The slower process extracts the full depth of each botanical, producing the layered complexity your recipe is designed for.'
+  };
+}
+
+function showResult() {
+  const step3 = document.getElementById('step3');
+  step3.classList.remove('active');
+  step3.classList.add('complete');
+
+  const name = document.getElementById('ginName').value.trim();
+  const baseKey = selectedBase.toLowerCase();
+  const styleKey = getStyleWeight(selectedBots);
+  const match = styleMatches[baseKey]?.[styleKey] || styleMatches.wheat.london;
+  const production = getProductionMethod(selectedBots);
+
+  document.getElementById('resultInner').innerHTML = `
+    <div class="result-eyebrow">Your Gin</div>
+    <div class="result-gin-name">${name}</div>
+    <div class="result-style">A ${match.style} expression</div>
+    <div class="result-rule"></div>
+    <div class="result-grid">
+      <div>
+        <div class="r-label">Base Spirit</div>
+        <div class="r-val">${selectedBase}</div>
+        <div class="r-label" style="margin-top:14px;">Botanicals</div>
+        <div class="r-val">Juniper${selectedBots.length ? ', ' + selectedBots.join(', ') : ''}</div>
+      </div>
+      <div>
+        <div class="r-label">Style Match</div>
+        <div class="r-val" style="font-size:1.05rem;margin-bottom:8px;">${match.style}</div>
+        <div class="r-val italic" style="font-size:0.8rem;">${match.reason}</div>
+        <div class="r-label" style="margin-top:14px;">Similar to</div>
+        <div class="r-val">${match.brand}</div>
+      </div>
+    </div>
+    <div class="result-match-box" style="margin-bottom:12px;">
+      <div class="r-label">Most likely production method</div>
+      <div class="r-val" style="font-size:0.95rem;margin-bottom:6px;">${production.method}</div>
+      <div class="r-val italic" style="font-size:0.78rem;">${production.reason}</div>
+    </div>
+    <div class="result-match-box">
+      <div class="r-label">What this means for you</div>
+      <div class="r-val italic" style="font-size:0.8rem;">Next time a client describes what they're looking for, think about which base and botanicals point in that direction — and you'll have a recommendation ready.</div>
+    </div>
+    <div class="screenshot-hint">Take a screenshot of your gin to keep it — or start again below.</div>
+    <button class="btn-reset" onclick="resetExercise()">Start again →</button>
+  `;
+
+  const result = document.getElementById('result');
+  result.style.display = 'block';
+  setTimeout(() => result.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 100);
+}
+
+function resetExercise() {
+  selectedBase = null;
+  selectedBots = [];
+  document.querySelectorAll('.base-option').forEach(o => o.classList.remove('selected'));
+  document.querySelectorAll('.bot-option:not(.locked)').forEach(o => o.classList.remove('selected'));
+  document.getElementById('ginName').value = '';
+  document.getElementById('btn1').disabled = true;
+  document.getElementById('btn2').disabled = true;
+  document.getElementById('btn3').disabled = true;
+  document.getElementById('base-selection').textContent = '';
+  document.getElementById('bot-selection').textContent = '';
+  updateBotCount();
+  ['step1','step2','step3'].forEach((id,i) => {
+    const el = document.getElementById(id);
+    el.classList.remove('active','complete');
+    if (i === 0) el.classList.add('active');
+  });
+  document.getElementById('result').style.display = 'none';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+</body>
+</html>
