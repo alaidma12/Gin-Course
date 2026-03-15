@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>pH Colour Shift — Butterfly Pea Flower</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=Inter:wght@400;500;600&display=swap');
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  width: 100%;
+  min-height: 100vh;
+  font-family: 'IM Fell English', serif;
+}
+
+.scene {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 40px 56px;
+  position: relative;
+  overflow: hidden;
+  background: #1A1A4A;
+  transition: background-color 0.3s ease;
+}
+
+.glow {
+  position: absolute;
+  width: 700px;
+  height: 700px;
+  border-radius: 50%;
+  filter: blur(140px);
+  opacity: 0.18;
+  pointer-events: none;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  transition: background 0.3s ease;
+  background: #4848CC;
+}
+
+/* Header */
+.header {
+  text-align: center;
+  margin-bottom: 40px;
+  position: relative;
+  z-index: 2;
+}
+
+.header-title {
+  font-family: 'IM Fell English', serif;
+  font-size: 1.5rem;
+  color: rgba(255,255,255,0.9);
+  line-height: 1.25;
+  margin-bottom: 10px;
+}
+
+.header-sub {
+  font-family: 'IM Fell English', serif;
+  font-style: italic;
+  font-size: 0.8rem;
+  color: rgba(255,255,255,0.45);
+  max-width: 400px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+/* Drink stage */
+.drink-stage {
+  position: relative;
+  width: 260px;
+  height: 320px;
+  margin-bottom: 36px;
+  z-index: 2;
+}
+
+/* Citrus drop */
+.citrus {
+  position: absolute;
+  top: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+  opacity: 0;
+  transition: top 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              opacity 0.3s ease;
+  z-index: 5;
+  pointer-events: none;
+}
+
+.citrus.dropping {
+  top: 80px;
+  opacity: 1;
+}
+
+.citrus.dropped {
+  top: 100px;
+  opacity: 0;
+}
+
+/* Splash rings */
+.splash-ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.3);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 6;
+  transition: none;
+}
+
+.splash-ring.active {
+  animation: splash 0.7s ease-out forwards;
+}
+
+@keyframes splash {
+  0%   { transform: translate(-50%, -50%) scale(0.2); opacity: 0.7; }
+  100% { transform: translate(-50%, -50%) scale(1.8); opacity: 0; }
+}
+
+/* pH readout */
+.ph-readout {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  z-index: 4;
+  pointer-events: none;
+}
+
+.ph-big {
+  font-family: 'IM Fell English', serif;
+  font-size: 2.8rem;
+  color: rgba(255,255,255,0.88);
+  line-height: 1;
+}
+
+.ph-unit {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.5rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.3);
+  margin-top: 2px;
+}
+
+.colour-label {
+  font-family: 'IM Fell English', serif;
+  font-style: italic;
+  font-size: 0.72rem;
+  color: rgba(255,255,255,0.55);
+  margin-top: 4px;
+  white-space: nowrap;
+}
+
+/* Slider */
+.slider-wrap {
+  width: 100%;
+  max-width: 520px;
+  position: relative;
+  z-index: 2;
+}
+
+.slider-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.slider-label {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.52rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.3);
+}
+
+.track-wrap {
+  position: relative;
+  height: 8px;
+  margin-bottom: 8px;
+}
+
+.track-bg {
+  position: absolute;
+  inset: 0;
+  border-radius: 4px;
+  /* Static gradient showing the full colour journey */
+  background: linear-gradient(to right,
+    #1A1A4A 0%,
+    #2D2880 20%,
+    #4B2D7A 45%,
+    #7B2060 68%,
+    #A82050 85%,
+    #8B1840 100%
+  );
+  opacity: 0.5;
+}
+
+.track-fill {
+  position: absolute;
+  right: 0; top: 0; bottom: 0;
+  border-radius: 0 4px 4px 0;
+  background: rgba(0,0,0,0.4);
+  transition: width 0.05s ease;
+}
+
+input[type=range] {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 100%;
+  transform: translateY(-50%);
+  -webkit-appearance: none;
+  background: transparent;
+  cursor: pointer;
+  z-index: 3;
+  direction: rtl;
+}
+
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: white;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.45);
+  border: 2px solid rgba(255,255,255,0.85);
+  transition: transform 0.15s ease;
+}
+
+input[type=range]::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+}
+
+input[type=range]::-moz-range-thumb {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: white;
+  border: 2px solid rgba(255,255,255,0.85);
+  cursor: pointer;
+}
+
+.tick-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 2px;
+}
+
+.tick {
+  font-family: 'IM Fell English', serif;
+  font-style: italic;
+  font-size: 0.62rem;
+  color: rgba(255,255,255,0.22);
+  transition: color 0.2s ease;
+}
+.tick.active { color: rgba(255,255,255,0.7); }
+
+/* Science note */
+.note {
+  margin-top: 28px;
+  max-width: 460px;
+  text-align: center;
+  z-index: 2;
+  position: relative;
+}
+.note p {
+  font-family: 'IM Fell English', serif;
+  font-style: italic;
+  font-size: 0.72rem;
+  color: rgba(255,255,255,0.32);
+  line-height: 1.7;
+}
+
+.rule {
+  width: 320px;
+  height: 1px;
+  background: linear-gradient(to right, transparent, rgba(201,168,76,0.22), transparent);
+  margin: 24px auto;
+  position: relative;
+  z-index: 2;
+}
+</style>
+</head>
+<body>
+
+<div class="scene" id="scene">
+  <div class="glow" id="glow"></div>
+
+  <div class="header">
+    <h2 class="header-title">The pH Colour Shift</h2>
+    <p class="header-sub">Drag toward acidic — see what a squeeze of citrus does to the gin.</p>
+  </div>
+
+  <div class="drink-stage" id="stage">
+
+    <!-- Citrus drop -->
+    <div class="citrus" id="citrus">
+      <svg width="44" height="44" viewBox="0 0 44 44" fill="none">
+        <!-- Lemon wedge -->
+        <path d="M22 4 C10 4 4 12 4 22 C4 32 10 40 22 40 Z" fill="#E8C84C" opacity="0.9"/>
+        <path d="M22 4 C34 4 40 12 40 22 C40 32 34 40 22 40 Z" fill="#D4B830" opacity="0.7"/>
+        <line x1="22" y1="4" x2="22" y2="40" stroke="rgba(255,255,255,0.4)" stroke-width="0.8"/>
+        <line x1="4" y1="22" x2="40" y2="22" stroke="rgba(255,255,255,0.25)" stroke-width="0.8"/>
+        <circle cx="22" cy="22" r="4" fill="rgba(255,255,255,0.2)"/>
+        <!-- Juice drops -->
+        <circle cx="13" cy="17" r="2" fill="rgba(255,255,255,0.35)"/>
+        <circle cx="31" cy="27" r="1.5" fill="rgba(255,255,255,0.3)"/>
+        <circle cx="28" cy="14" r="1.2" fill="rgba(255,255,255,0.25)"/>
+      </svg>
+    </div>
+
+    <!-- Splash rings (positioned at glass rim) -->
+    <div class="splash-ring" id="ring1" style="width:60px;height:20px;top:95px;"></div>
+    <div class="splash-ring" id="ring2" style="width:80px;height:26px;top:92px;animation-delay:0.1s;"></div>
+
+    <!-- Gin glass SVG -->
+    <svg width="260" height="320" viewBox="0 0 260 320" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="liquidFill" x1="130" y1="100" x2="130" y2="270" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stop-color="rgba(255,255,255,0.12)"/>
+          <stop offset="100%" stop-color="rgba(0,0,0,0.2)"/>
+        </linearGradient>
+        <linearGradient id="glassSheen" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="rgba(255,255,255,0.18)"/>
+          <stop offset="50%" stop-color="rgba(255,255,255,0.04)"/>
+          <stop offset="100%" stop-color="rgba(255,255,255,0.06)"/>
+        </linearGradient>
+        <clipPath id="liquidClip">
+          <!-- Balloon gin glass shape — liquid area -->
+          <path d="M72 108 C60 148 56 188 68 226 C80 256 180 256 192 226 C204 188 200 148 188 108 Z"/>
+        </clipPath>
+      </defs>
+
+      <!-- Stem and base -->
+      <ellipse cx="130" cy="308" rx="56" ry="7" fill="rgba(255,255,255,0.07)" stroke="rgba(255,255,255,0.14)" stroke-width="1"/>
+      <rect x="124" y="272" width="12" height="38" rx="3" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+
+      <!-- Balloon glass bowl outline -->
+      <path d="M72 108 C60 148 56 188 68 226 C80 256 180 256 192 226 C204 188 200 148 188 108 Z"
+        fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.18)" stroke-width="1.5"/>
+
+      <!-- Liquid fill — colour controlled by JS -->
+      <g clip-path="url(#liquidClip)">
+        <rect id="liquidRect" x="56" y="108" width="148" height="148" fill="#1A1A5A" opacity="0.92"/>
+        <!-- Liquid overlay for depth -->
+        <rect x="56" y="108" width="148" height="148" fill="url(#liquidFill)"/>
+        <!-- Surface shimmer -->
+        <ellipse cx="130" cy="112" rx="58" ry="10" fill="rgba(255,255,255,0.08)"/>
+      </g>
+
+      <!-- Glass sheen — left highlight -->
+      <path d="M76 120 C68 148 66 178 72 206"
+        stroke="rgba(255,255,255,0.22)" stroke-width="2.5" stroke-linecap="round"/>
+      <!-- Right reflection -->
+      <path d="M184 120 C192 148 194 178 188 206"
+        stroke="rgba(255,255,255,0.07)" stroke-width="1.5" stroke-linecap="round"/>
+
+      <!-- Rim -->
+      <ellipse cx="130" cy="108" rx="58" ry="11"
+        fill="none" stroke="rgba(255,255,255,0.22)" stroke-width="1.5"/>
+
+      <!-- Tonic bubbles — more active at acidic end -->
+      <circle id="bub1" cx="110" cy="220" r="3" fill="rgba(255,255,255,0.1)"/>
+      <circle id="bub2" cx="148" cy="198" r="2.2" fill="rgba(255,255,255,0.08)"/>
+      <circle id="bub3" cx="122" cy="175" r="1.8" fill="rgba(255,255,255,0.07)"/>
+      <circle id="bub4" cx="158" cy="232" r="2.5" fill="rgba(255,255,255,0.08)"/>
+      <circle id="bub5" cx="103" cy="188" r="1.5" fill="rgba(255,255,255,0.06)"/>
+
+      <!-- Garnish hint — lemon wheel at rim, visible at acidic end -->
+      <g id="garnish" opacity="0">
+        <circle cx="174" cy="104" r="18" fill="#D4B830" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+        <circle cx="174" cy="104" r="10" fill="#E8C84C" opacity="0.7"/>
+        <circle cx="174" cy="104" r="4" fill="rgba(255,255,255,0.25)"/>
+        <line x1="174" y1="86" x2="174" y2="122" stroke="rgba(255,255,255,0.3)" stroke-width="0.8"/>
+        <line x1="156" y1="104" x2="192" y2="104" stroke="rgba(255,255,255,0.2)" stroke-width="0.8"/>
+        <line x1="161" y1="91" x2="187" y2="117" stroke="rgba(255,255,255,0.15)" stroke-width="0.8"/>
+        <line x1="187" y1="91" x2="161" y2="117" stroke="rgba(255,255,255,0.15)" stroke-width="0.8"/>
+      </g>
+    </svg>
+
+    <!-- pH readout overlaid on glass -->
+    <div class="ph-readout">
+      <div class="ph-big" id="phBig">8.0</div>
+      <div class="ph-unit">pH</div>
+      <div class="colour-label" id="colourLabel">Blue-indigo</div>
+    </div>
+
+  </div><!-- /drink-stage -->
+
+  <div class="slider-wrap">
+    <div class="slider-labels">
+      <span class="slider-label">Alkaline — pH 8</span>
+      <span class="slider-label">Acidic — pH 3</span>
+    </div>
+    <div class="track-wrap">
+      <div class="track-bg"></div>
+      <div class="track-fill" id="trackFill"></div>
+      <input type="range" id="slider" min="30" max="80" value="80"
+        aria-label="pH slider — drag right toward acidic to watch the colour shift">
+    </div>
+    <div class="tick-row">
+      <span class="tick active" data-ph="8">8</span>
+      <span class="tick" data-ph="7">7</span>
+      <span class="tick" data-ph="6">6</span>
+      <span class="tick" data-ph="5">5</span>
+      <span class="tick" data-ph="4">4</span>
+      <span class="tick" data-ph="3">3</span>
+    </div>
+  </div>
+
+  <div class="rule"></div>
+
+  <div class="note">
+    <p>Butterfly pea flower contains anthocyanins — natural pigments that act as pH indicators.
+    Add citrus and the pH drops. The colour follows.</p>
+  </div>
+
+</div>
+
+<script>
+const slider   = document.getElementById('slider');
+const scene    = document.getElementById('scene');
+const glow     = document.getElementById('glow');
+const liquid   = document.getElementById('liquidRect');
+const phBig    = document.getElementById('phBig');
+const colourLabel = document.getElementById('colourLabel');
+const trackFill   = document.getElementById('trackFill');
+const citrus   = document.getElementById('citrus');
+const garnish  = document.getElementById('garnish');
+const ring1    = document.getElementById('ring1');
+const ring2    = document.getElementById('ring2');
+const ticks    = document.querySelectorAll('.tick');
+
+// Realistic colour stops — blue-indigo → violet → deep rose-magenta
+// NOT hot pink. These are based on actual butterfly pea flower gin behaviour.
+const stops = [
+  { ph:8.0, bg:'#1A1A4A', liquid:'#1E2870', glow:'#2840CC', label:'Blue-indigo' },
+  { ph:7.5, bg:'#1C1A4E', liquid:'#253088', glow:'#3045CC', label:'Deep indigo' },
+  { ph:7.0, bg:'#201848', liquid:'#2E2880', glow:'#3840B8', label:'Indigo' },
+  { ph:6.5, bg:'#241640', liquid:'#3A2478', glow:'#4838A8', label:'Indigo-violet' },
+  { ph:6.0, bg:'#261445', liquid:'#441E78', glow:'#5030A0', label:'Violet' },
+  { ph:5.5, bg:'#281240', liquid:'#541870', glow:'#6028A0', label:'Deep violet' },
+  { ph:5.0, bg:'#2A1038', liquid:'#641460', glow:'#701890', label:'Violet-purple' },
+  { ph:4.5, bg:'#2C0E34', liquid:'#741050', glow:'#801870', label:'Purple-rose' },
+  { ph:4.0, bg:'#2E0C30', liquid:'#820E44', glow:'#901860', label:'Rose-purple' },
+  { ph:3.5, bg:'#300A28', liquid:'#900C38', glow:'#A01850', label:'Deep rose' },
+  { ph:3.0, bg:'#320820', liquid:'#9A0A2E', glow:'#B01848', label:'Rose-magenta' },
+];
+
+function lerp(a,b,t){ return a+(b-a)*t; }
+function hexToRgb(h){ return [parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)]; }
+function rgbToHex(r,g,b){ return '#'+[r,g,b].map(v=>Math.round(v).toString(16).padStart(2,'0')).join(''); }
+function lerpColor(c1,c2,t){
+  const [r1,g1,b1]=hexToRgb(c1), [r2,g2,b2]=hexToRgb(c2);
+  return rgbToHex(lerp(r1,r2,t),lerp(g1,g2,t),lerp(b1,b2,t));
+}
+
+function getAt(ph){
+  ph = Math.max(3,Math.min(8,ph));
+  for(let i=0;i<stops.length-1;i++){
+    const s0=stops[i], s1=stops[i+1];
+    if(ph<=s0.ph && ph>=s1.ph){
+      const t=(s0.ph-ph)/(s0.ph-s1.ph);
+      return {
+        bg: lerpColor(s0.bg,s1.bg,t),
+        liquid: lerpColor(s0.liquid,s1.liquid,t),
+        glow: lerpColor(s0.glow,s1.glow,t),
+        label: t<0.5?s0.label:s1.label,
+      };
+    }
+  }
+  return stops[stops.length-1];
+}
+
+let lastPh = 8.0;
+let citrusTimer = null;
+
+function triggerCitrus(){
+  // Trigger drop animation
+  citrus.classList.remove('dropping','dropped');
+  void citrus.offsetWidth;
+  citrus.classList.add('dropping');
+  setTimeout(()=>{
+    citrus.classList.add('dropped');
+    ring1.classList.remove('active'); void ring1.offsetWidth; ring1.classList.add('active');
+    ring2.classList.remove('active'); void ring2.offsetWidth; ring2.classList.add('active');
+  }, 580);
+  setTimeout(()=>{ citrus.classList.remove('dropping','dropped'); }, 1200);
+}
+
+function update(){
+  const val = parseInt(slider.value); // 30–80, rtl so 80=left=alkaline
+  const ph = val/10;
+  // trackFill darkens the right portion (already revealed = left, unrevealed = right)
+  const pct = (80-val)/50*100; // how far toward acid we are
+  trackFill.style.width = (100-pct)+'%';
+
+  const c = getAt(ph);
+  scene.style.backgroundColor = c.bg;
+  glow.style.background = c.glow;
+  liquid.setAttribute('fill', c.liquid);
+  phBig.textContent = ph.toFixed(1);
+  colourLabel.textContent = c.label;
+
+  // Show garnish/citrus at acidic end
+  const acidProgress = (8-ph)/5; // 0 at pH8, 1 at pH3
+  garnish.setAttribute('opacity', Math.min(1, acidProgress*2).toFixed(2));
+
+  // Bubble opacity increases with acidity
+  document.querySelectorAll('[id^="bub"]').forEach(b=>{
+    b.setAttribute('fill', `rgba(255,255,255,${(0.06+acidProgress*0.18).toFixed(2)})`);
+  });
+
+  // Trigger citrus drop when crossing pH 5 downward
+  if(lastPh >= 5 && ph < 5){
+    if(citrusTimer) clearTimeout(citrusTimer);
+    citrusTimer = setTimeout(triggerCitrus, 80);
+  }
+
+  ticks.forEach(t=>{
+    const tph = parseFloat(t.dataset.ph);
+    t.classList.toggle('active', Math.abs(tph-ph)<0.6);
+  });
+
+  lastPh = ph;
+}
+
+slider.addEventListener('input', update);
+update();
+</script>
+</body>
+</html>

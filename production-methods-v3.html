@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gin Production Methods</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=Inter:wght@400;500;600;700&display=swap');
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'IM Fell English', serif;
+  background: #F2EFE8;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 48px 40px 64px;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: repeating-linear-gradient(
+    0deg, transparent, transparent 28px,
+    rgba(58,84,56,0.04) 28px, rgba(58,84,56,0.04) 29px
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+.container {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 780px;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.title {
+  font-family: 'IM Fell English', serif;
+  font-size: 1.8rem;
+  color: #0D1F1A;
+  line-height: 1.2;
+  margin-bottom: 10px;
+}
+
+.subtitle {
+  font-family: 'IM Fell English', serif;
+  font-style: italic;
+  font-size: 0.82rem;
+  color: #3A5438;
+  opacity: 0.7;
+}
+
+/* Accordion */
+.accordion {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Each item */
+.item {
+  border: 1.5px solid rgba(13,31,26,0.12);
+  border-radius: 6px;
+  overflow: hidden;
+  transition: border-color 0.2s ease;
+}
+
+.item.open {
+  border-color: #A8502A;
+}
+
+/* Header row — always visible */
+.item-header {
+  background: rgba(255,255,255,0.55);
+  padding: 20px 24px;
+  display: grid;
+  grid-template-columns: 52px 1fr auto;
+  align-items: center;
+  gap: 20px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  outline: none;
+  user-select: none;
+}
+
+.item-header:hover { background: rgba(255,255,255,0.8); }
+.item.open .item-header { background: rgba(255,255,255,0.9); }
+
+.item-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  flex-shrink: 0;
+}
+
+.item-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.item-num {
+  font-family: 'IM Fell English', serif;
+  font-style: italic;
+  font-size: 0.6rem;
+  color: #C9A84C;
+  opacity: 0.7;
+}
+
+.item-name {
+  font-family: 'IM Fell English', serif;
+  font-size: 1.05rem;
+  color: #0D1F1A;
+  line-height: 1.2;
+}
+
+.item-legal {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.44rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #A8502A;
+  opacity: 0.55;
+}
+
+.item-hook {
+  font-family: 'IM Fell English', serif;
+  font-style: italic;
+  font-size: 0.72rem;
+  color: #3A5438;
+  opacity: 0.6;
+  line-height: 1.4;
+  margin-top: 2px;
+}
+
+/* Chevron */
+.chevron {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  transition: transform 0.3s ease;
+  opacity: 0.35;
+}
+
+.item.open .chevron {
+  transform: rotate(180deg);
+  opacity: 0.7;
+}
+
+/* Expandable body */
+.item-body {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.item.open .item-body {
+  max-height: 600px;
+}
+
+.item-body-inner {
+  background: #0D1F1A;
+  padding: 28px 32px 36px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  position: relative;
+  overflow: hidden;
+}
+
+.item-body-inner::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 85% 15%, rgba(201,168,76,0.06) 0%, transparent 55%);
+  pointer-events: none;
+}
+
+/* Panel column labels + values */
+.col { position: relative; z-index: 1; }
+
+.col-label {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.48rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #C9A84C;
+  opacity: 0.6;
+  margin-bottom: 7px;
+  margin-top: 18px;
+}
+
+.col-label:first-child { margin-top: 0; }
+
+.panel-heading {
+  font-family: 'IM Fell English', serif;
+  font-size: 1.15rem;
+  color: #F2EFE8;
+  line-height: 1.2;
+  margin-bottom: 4px;
+}
+
+.panel-legal {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.44rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #C9A84C;
+  opacity: 0.4;
+  margin-bottom: 12px;
+}
+
+.col-val {
+  font-family: 'IM Fell English', serif;
+  font-size: 0.9rem;
+  color: rgba(242,239,232,0.82);
+  line-height: 1.75;
+}
+
+.col-val.italic { font-style: italic; color: rgba(242,239,232,0.68); }
+.col-val.small  { font-size: 0.78rem; opacity: 0.65; }
+
+.brand-tag {
+  display: inline-block;
+  background: rgba(201,168,76,0.12);
+  border: 1px solid rgba(201,168,76,0.25);
+  color: #C9A84C;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.46rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 3px 9px;
+  border-radius: 2px;
+  margin-right: 4px;
+  margin-bottom: 4px;
+}
+
+/* Vertical dividers between columns */
+.item-body-inner .col:not(:last-child) {
+  border-right: 1px solid rgba(201,168,76,0.1);
+  padding-right: 24px;
+}
+
+@media (max-width: 600px) {
+  .item-body-inner { grid-template-columns: 1fr; }
+  .item-body-inner .col:not(:last-child) { border-right: none; border-bottom: 1px solid rgba(201,168,76,0.1); padding-right: 0; padding-bottom: 16px; }
+  .item-header { grid-template-columns: 40px 1fr auto; gap: 12px; }
+}</style>
+</head>
+<body>
+
+<div class="container">
+
+  <div class="header">
+    <h2 class="title">Three Methods. One Category.</h2>
+    <p class="subtitle">Select a method to expand it and learn how it works.</p>
+  </div>
+
+  <div class="accordion">
+
+    <!-- Item 1: Pot Still Gin -->
+    <div class="item" id="i1">
+      <div class="item-header" tabindex="0" role="button"
+        aria-expanded="false" aria-controls="b1"
+        onclick="toggle('i1')"
+        onkeydown="if(event.key==='Enter'||event.key===' '){toggle('i1');event.preventDefault();}">
+        <div class="item-icon">
+          <svg width="38" height="52" viewBox="0 0 64 80" fill="none">
+            <path d="M10 68 C10 52 15 38 22 30 L22 22 C22 20 26 18 32 18 C38 18 42 20 42 22 L42 30 C49 38 54 52 54 68 Z"
+              stroke="#3A5438" stroke-width="1.5" fill="rgba(58,84,56,0.07)"/>
+            <rect x="26" y="10" width="12" height="10" rx="3" stroke="#3A5438" stroke-width="1.3" fill="rgba(58,84,56,0.06)"/>
+            <path d="M38 16 C48 12 56 8 60 4" stroke="#3A5438" stroke-width="1.3" stroke-linecap="round"/>
+            <path d="M60 4 C64 2 66 6 62 8 C58 10 62 14 58 16" stroke="#3A5438" stroke-width="1" stroke-linecap="round"/>
+            <path d="M18 72 C19 68 17 65 19 62" stroke="#A8502A" stroke-width="1" stroke-linecap="round" opacity="0.5"/>
+            <path d="M32 74 C33 70 31 67 33 64" stroke="#A8502A" stroke-width="1" stroke-linecap="round" opacity="0.5"/>
+            <path d="M46 72 C47 68 45 65 47 62" stroke="#A8502A" stroke-width="1" stroke-linecap="round" opacity="0.5"/>
+            <ellipse cx="32" cy="62" rx="16" ry="6" fill="rgba(201,168,76,0.12)" stroke="rgba(201,168,76,0.2)" stroke-width="0.8"/>
+          </svg>
+        </div>
+        <div class="item-meta">
+          <div class="item-num">i.</div>
+          <div class="item-name">Pot Still Gin</div>
+          <div class="item-legal">Legal category: Distilled Gin</div>
+          <div class="item-hook">Traditional. Full-flavoured. Botanicals go in with the spirit.</div>
+        </div>
+        <svg class="chevron" viewBox="0 0 20 20" fill="none">
+          <path d="M5 7.5L10 12.5L15 7.5" stroke="#0D1F1A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="item-body" id="b1" role="region">
+        <div class="item-body-inner">
+          <div class="col">
+            <div class="col-label">What it is</div>
+            <div class="col-val">The base spirit and botanicals go into a copper pot still together and are heated. As vapour rises, it carries the botanical character through the lyne arm — the curved pipe at the top — into a condenser, where it cools back into liquid. Rich, full-flavoured, and complex.</div>
+            <div class="col-label">Vapour infusion — a variation</div>
+            <div class="col-val small">Some distillers suspend botanicals in a basket above the spirit rather than submerging them. The rising vapour passes through the basket, picking up flavour more gently — lighter extraction, more delicate result. Bombay Sapphire is the most well-known example.</div>
+            <div class="col-label">Worth knowing</div>
+            <div class="col-val small">The oldest method — originally used for Dutch genever, the ancestor of modern gin. The heavier, maltier character of pot still gin is still present in some traditional Dutch and Belgian styles.</div>
+          </div>
+          <div class="col">
+            <div class="col-label">What it produces</div>
+            <div class="col-val">Full-bodied gin with complex, layered botanical flavour. Juniper is forward. Each botanical expresses clearly.</div>
+            <div class="col-label">What to tell a client</div>
+            <div class="col-val italic">"Everything goes into the still together. You can taste every decision the distiller made."</div>
+            <div class="col-label">Brand examples</div>
+            <div class="col-val">
+              <span class="brand-tag">Beefeater</span>
+              <span class="brand-tag">Tanqueray</span>
+              <span class="brand-tag">Bombay Sapphire*</span>
+            </div>
+            <div class="col-label">On the label</div>
+            <div class="col-val">Look for <strong style="color:#F2EFE8;">"Distilled Gin"</strong> — confirms the spirit went through a still with real botanicals, not extracts.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Item 2: Column Still Gin -->
+    <div class="item" id="i2">
+      <div class="item-header" tabindex="0" role="button"
+        aria-expanded="false" aria-controls="b2"
+        onclick="toggle('i2')"
+        onkeydown="if(event.key==='Enter'||event.key===' '){toggle('i2');event.preventDefault();}">
+        <div class="item-icon">
+          <svg width="28" height="52" viewBox="0 0 44 80" fill="none">
+            <rect x="14" y="8" width="16" height="60" rx="3" stroke="#3A5438" stroke-width="1.5" fill="rgba(58,84,56,0.06)"/>
+            <line x1="14" y1="24" x2="30" y2="24" stroke="#3A5438" stroke-width="0.8" opacity="0.4"/>
+            <line x1="14" y1="36" x2="30" y2="36" stroke="#3A5438" stroke-width="0.8" opacity="0.4"/>
+            <line x1="14" y1="48" x2="30" y2="48" stroke="#3A5438" stroke-width="0.8" opacity="0.4"/>
+            <line x1="14" y1="60" x2="30" y2="60" stroke="#3A5438" stroke-width="0.8" opacity="0.4"/>
+            <ellipse cx="22" cy="8" rx="10" ry="4" stroke="#3A5438" stroke-width="1.3" fill="rgba(58,84,56,0.1)"/>
+            <ellipse cx="22" cy="68" rx="10" ry="4" stroke="#3A5438" stroke-width="1.3" fill="rgba(58,84,56,0.1)"/>
+            <path d="M30 20 C38 20 40 16 40 12" stroke="#3A5438" stroke-width="1.2" stroke-linecap="round"/>
+            <path d="M14 56 C6 56 4 60 4 64" stroke="#3A5438" stroke-width="1.2" stroke-linecap="round"/>
+            <circle cx="22" cy="30" r="1.2" fill="#C9A84C" opacity="0.35"/>
+            <circle cx="22" cy="42" r="1.2" fill="#C9A84C" opacity="0.35"/>
+            <circle cx="22" cy="54" r="1.2" fill="#C9A84C" opacity="0.35"/>
+          </svg>
+        </div>
+        <div class="item-meta">
+          <div class="item-num">ii.</div>
+          <div class="item-name">Column Still Gin</div>
+          <div class="item-legal">Legal category: Redistilled Gin</div>
+          <div class="item-hook">Cleaner. More precise. Neutral spirit redistilled with botanicals.</div>
+        </div>
+        <svg class="chevron" viewBox="0 0 20 20" fill="none">
+          <path d="M5 7.5L10 12.5L15 7.5" stroke="#0D1F1A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="item-body" id="b2" role="region">
+        <div class="item-body-inner">
+          <div class="col">
+            <div class="col-label">What it is</div>
+            <div class="col-val">A neutral spirit is first macerated — steeped — with botanicals, then redistilled through a tall column still. The column refines the spirit multiple times in a single pass, producing a very clean, high-proof base. Botanical flavour is present but more precise and restrained than pot still gin.</div>
+            <div class="col-label">Note on Hendrick's</div>
+            <div class="col-val small">Hendrick's runs both a pot still and a column still separately, then blends the outputs. The pot brings richness; the column brings precision. It sits between both worlds — which is exactly their point of difference.</div>
+            <div class="col-label">Worth knowing</div>
+            <div class="col-val small">The column still transformed gin production in the 1830s. The lighter, drier style we associate with gin today is almost entirely a product of this method.</div>
+          </div>
+          <div class="col">
+            <div class="col-label">What it produces</div>
+            <div class="col-val">Lighter, cleaner gin. The spirit steps back — the botanicals define the character. Consistent batch to batch.</div>
+            <div class="col-label">What to tell a client</div>
+            <div class="col-val italic">"The column strips everything back and lets the botanicals do the talking. Cleaner, crisper, more consistent."</div>
+            <div class="col-label">Brand examples</div>
+            <div class="col-val">
+              <span class="brand-tag">Gordon's</span>
+              <span class="brand-tag">Sipsmith</span>
+              <span class="brand-tag">Hendrick's*</span>
+            </div>
+            <div class="col-label">On the label</div>
+            <div class="col-val">Look for <strong style="color:#F2EFE8;">"Redistilled Gin"</strong> or <strong style="color:#F2EFE8;">"London Dry Gin"</strong> — London Dry is always column still redistillation.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Item 3: Compound Gin -->
+    <div class="item" id="i3">
+      <div class="item-header" tabindex="0" role="button"
+        aria-expanded="false" aria-controls="b3"
+        onclick="toggle('i3')"
+        onkeydown="if(event.key==='Enter'||event.key===' '){toggle('i3');event.preventDefault();}">
+        <div class="item-icon">
+          <svg width="44" height="52" viewBox="0 0 64 80" fill="none">
+            <path d="M10 28 C8 44 10 58 14 66 C18 72 46 72 50 66 C54 58 56 44 54 28 Z"
+              stroke="#3A5438" stroke-width="1.5" fill="rgba(58,84,56,0.06)"/>
+            <ellipse cx="32" cy="28" rx="22" ry="7" stroke="#3A5438" stroke-width="1.3" fill="rgba(58,84,56,0.08)"/>
+            <ellipse cx="32" cy="30" rx="18" ry="5" fill="rgba(201,168,76,0.1)" stroke="rgba(201,168,76,0.2)" stroke-width="0.8"/>
+            <circle cx="20" cy="12" r="3.5" fill="#C9A84C" opacity="0.45" stroke="#3A5438" stroke-width="0.8"/>
+            <circle cx="32" cy="8" r="3" fill="#C9A84C" opacity="0.4" stroke="#3A5438" stroke-width="0.8"/>
+            <circle cx="44" cy="12" r="3.5" fill="#C9A84C" opacity="0.45" stroke="#3A5438" stroke-width="0.8"/>
+            <line x1="20" y1="16" x2="22" y2="24" stroke="#3A5438" stroke-width="0.8" stroke-dasharray="2 2" opacity="0.4"/>
+            <line x1="32" y1="11" x2="32" y2="22" stroke="#3A5438" stroke-width="0.8" stroke-dasharray="2 2" opacity="0.4"/>
+            <line x1="44" y1="16" x2="42" y2="24" stroke="#3A5438" stroke-width="0.8" stroke-dasharray="2 2" opacity="0.4"/>
+            <path d="M24 48 C28 44 36 44 40 48 C44 52 36 56 32 54 C28 52 24 56 28 60"
+              stroke="#3A5438" stroke-width="0.9" stroke-linecap="round" opacity="0.3"/>
+          </svg>
+        </div>
+        <div class="item-meta">
+          <div class="item-num">iii.</div>
+          <div class="item-name">Compound Gin</div>
+          <div class="item-legal">Legal category: Compound Gin</div>
+          <div class="item-hook">No still. Botanical extracts blended directly into spirit.</div>
+        </div>
+        <svg class="chevron" viewBox="0 0 20 20" fill="none">
+          <path d="M5 7.5L10 12.5L15 7.5" stroke="#0D1F1A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="item-body" id="b3" role="region">
+        <div class="item-body-inner">
+          <div class="col">
+            <div class="col-label">What it is</div>
+            <div class="col-val">No still involved. Botanical extracts or essences are blended directly into a neutral spirit and diluted to bottling strength. Faster and less expensive than distillation. Legal in most markets — but it cannot be labelled as a distilled gin.</div>
+            <div class="col-label">Why it matters in sales</div>
+            <div class="col-val small">Knowing this distinction lets you position distilled gins confidently against less expensive alternatives — without being dismissive. It's a credibility moment with a knowledgeable client.</div>
+          </div>
+          <div class="col">
+            <div class="col-label">What it produces</div>
+            <div class="col-val">Variable quality — can be perfectly serviceable or noticeably artificial depending on the extracts used. Rarely found at the premium end of the market.</div>
+            <div class="col-label">What to tell a client</div>
+            <div class="col-val italic">"No still, no heat — just extracts blended in. It's legal, but it's not the same process. Worth knowing when you're comparing bottles."</div>
+            <div class="col-label">On the label</div>
+            <div class="col-val">A bottle that says <strong style="color:#F2EFE8;">"Gin"</strong> without "distilled" may be compound gin — a useful distinction when a client asks why two bottles are at very different price points.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /accordion -->
+
+</div>
+
+<script>
+function toggle(id) {
+  const item = document.getElementById(id);
+  const isOpen = item.classList.contains('open');
+  const header = item.querySelector('.item-header');
+
+  // Close all
+  document.querySelectorAll('.item').forEach(el => {
+    el.classList.remove('open');
+    el.querySelector('.item-header').setAttribute('aria-expanded', 'false');
+  });
+
+  // If it wasn't open, open it
+  if (!isOpen) {
+    item.classList.add('open');
+    header.setAttribute('aria-expanded', 'true');
+  }
+}
+</script>
+</body>
+</html>
