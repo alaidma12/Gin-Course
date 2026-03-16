@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gin in the Glass</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=Inter:wght@400;500;600;700&display=swap');
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'IM Fell English', serif;
+  background: #F2EFE8;
+  min-height: 100vh;
+  padding: 48px 32px 64px;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: repeating-linear-gradient(
+    0deg, transparent, transparent 28px,
+    rgba(58,84,56,0.04) 28px, rgba(58,84,56,0.04) 29px
+  );
+  pointer-events: none;
+}
+
+.container {
+  position: relative;
+  z-index: 1;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 48px;
+}
+
+.title {
+  font-family: 'IM Fell English', serif;
+  font-size: 1.8rem;
+  color: #0D1F1A;
+  margin-bottom: 10px;
+}
+
+.subtitle {
+  font-family: 'IM Fell English', serif;
+  font-style: italic;
+  font-size: 0.82rem;
+  color: #3A5438;
+  opacity: 0.65;
+}
+
+/* Grid */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+/* Card */
+.card {
+  background: #0D1F1A;
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  outline: none;
+  border: 1px solid rgba(242,239,232,0.08);
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 40px rgba(0,0,0,0.35);
+}
+
+/* Image area — illustrated placeholder */
+.card-image {
+  width: 100%;
+  aspect-ratio: 3/4;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Hover overlay */
+.card-image::after {
+  content: 'Select to explore →';
+  position: absolute;
+  inset: 0;
+  background: rgba(13,31,26,0.65);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.48rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #C9A84C;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.card:hover .card-image::after { opacity: 1; }
+
+/* Card footer */
+.card-footer {
+  padding: 14px 16px 16px;
+}
+
+.card-name {
+  font-family: 'IM Fell English', serif;
+  font-size: 0.95rem;
+  color: #F2EFE8;
+  margin-bottom: 3px;
+}
+
+.card-style {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.44rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #C9A84C;
+  opacity: 0.55;
+}
+
+/* Overlay */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(13,31,26,0.88);
+  z-index: 100;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+}
+
+.overlay.visible { display: flex; }
+
+.modal {
+  background: #F2EFE8;
+  border-radius: 10px;
+  width: 100%;
+  max-width: 780px;
+  max-height: 88vh;
+  overflow-y: auto;
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  position: relative;
+}
+
+.modal-image {
+  border-radius: 10px 0 0 10px;
+  overflow: hidden;
+  min-height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-body {
+  padding: 32px 32px 36px;
+  position: relative;
+}
+
+.modal-body::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(
+    0deg, transparent, transparent 28px,
+    rgba(58,84,56,0.04) 28px, rgba(58,84,56,0.04) 29px
+  );
+  pointer-events: none;
+  border-radius: 0 10px 10px 0;
+}
+
+.modal-inner { position: relative; z-index: 1; }
+
+.close-btn {
+  position: absolute;
+  top: 14px; right: 14px;
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  background: rgba(13,31,26,0.08);
+  border: 1px solid rgba(13,31,26,0.12);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px;
+  z-index: 2;
+  transition: background 0.2s;
+}
+.close-btn:hover { background: rgba(13,31,26,0.15); }
+
+.m-eyebrow {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.44rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #A8502A;
+  margin-bottom: 6px;
+}
+
+.m-title {
+  font-family: 'IM Fell English', serif;
+  font-size: 1.6rem;
+  color: #0D1F1A;
+  line-height: 1.2;
+  margin-bottom: 4px;
+}
+
+.m-style {
+  font-family: 'IM Fell English', serif;
+  font-style: italic;
+  font-size: 0.75rem;
+  color: #3A5438;
+  opacity: 0.7;
+  margin-bottom: 18px;
+}
+
+.m-rule {
+  height: 1px;
+  background: rgba(201,168,76,0.3);
+  margin-bottom: 18px;
+}
+
+.m-label {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.44rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #A8502A;
+  margin-bottom: 5px;
+  margin-top: 14px;
+}
+
+.m-label:first-child { margin-top: 0; }
+
+.m-val {
+  font-family: 'IM Fell English', serif;
+  font-size: 0.85rem;
+  color: #0D1F1A;
+  line-height: 1.65;
+}
+
+.m-val.italic { font-style: italic; color: #3A5438; }
+
+.m-ingredients {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.ingredient-tag {
+  background: rgba(13,31,26,0.07);
+  border: 1px solid rgba(13,31,26,0.12);
+  border-radius: 3px;
+  padding: 3px 9px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.44rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #0D1F1A;
+}
+
+@media (max-width: 640px) {
+  .grid { grid-template-columns: repeat(2, 1fr); }
+  .modal { grid-template-columns: 1fr; }
+  .modal-image { min-height: 220px; border-radius: 10px 10px 0 0; }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <div class="grid" id="grid"></div>
+
+</div>
+
+<!-- Overlay -->
+<div class="overlay" id="overlay">
+  <div class="modal" id="modal">
+    <div class="modal-image" id="modalImage"></div>
+    <div class="modal-body">
+      <button class="close-btn" onclick="closeModal()">✕</button>
+      <div class="modal-inner" id="modalContent"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const cocktails = [
+  {
+    name: 'Gin & Tonic',
+    style: 'The universal serve',
+    bgColor: '#132318',
+    accentColor: '#C9A84C',
+    // SVG illustration — tall glass with ice and garnish
+    illustration: `<svg width="120" height="200" viewBox="0 0 120 200" fill="none">
+      <!-- Glass -->
+      <path d="M30 30 L20 160 C20 170 30 178 60 178 C90 178 100 170 100 160 L90 30 Z"
+        stroke="rgba(242,239,232,0.25)" stroke-width="1.5" fill="rgba(242,239,232,0.04)"/>
+      <!-- Liquid -->
+      <path d="M33 60 L23 155 C23 164 32 172 60 172 C88 172 97 164 97 155 L87 60 Z"
+        fill="rgba(19,35,24,0.8)"/>
+      <!-- Ice cubes -->
+      <rect x="38" y="70" width="22" height="22" rx="3" fill="rgba(242,239,232,0.15)" stroke="rgba(242,239,232,0.2)" stroke-width="1"/>
+      <rect x="62" y="78" width="20" height="20" rx="3" fill="rgba(242,239,232,0.12)" stroke="rgba(242,239,232,0.18)" stroke-width="1"/>
+      <rect x="44" y="96" width="18" height="18" rx="3" fill="rgba(242,239,232,0.1)" stroke="rgba(242,239,232,0.15)" stroke-width="1"/>
+      <!-- Bubbles -->
+      <circle cx="50" cy="140" r="2" fill="rgba(242,239,232,0.2)"/>
+      <circle cx="68" cy="125" r="1.5" fill="rgba(242,239,232,0.15)"/>
+      <circle cx="58" cy="150" r="1.5" fill="rgba(242,239,232,0.18)"/>
+      <!-- Lime garnish -->
+      <ellipse cx="82" cy="34" rx="14" ry="14" fill="#2A5A2A" stroke="rgba(242,239,232,0.2)" stroke-width="1"/>
+      <ellipse cx="82" cy="34" rx="8" ry="8" fill="#3A7A3A" opacity="0.7"/>
+      <line x1="82" y1="20" x2="82" y2="48" stroke="rgba(242,239,232,0.2)" stroke-width="0.8"/>
+      <line x1="68" y1="34" x2="96" y2="34" stroke="rgba(242,239,232,0.15)" stroke-width="0.8"/>
+      <!-- Straw -->
+      <line x1="75" y1="25" x2="55" y2="175" stroke="rgba(201,168,76,0.5)" stroke-width="2.5" stroke-linecap="round"/>
+    </svg>`,
+    ingredients: ['50ml gin', '150ml premium tonic', 'Large ice cubes', 'Garnish to match gin'],
+    desc: 'The G&T is gin\'s most universal moment. Simple to build, easy to personalise, and often the first drink a client will order. Getting it right — the right tonic, the right glass, the right garnish — is where knowledge becomes visible.',
+    howTo: [
+      'Fill a balloon glass with large ice cubes',
+      'Pour 50ml gin over the ice',
+      'Add 150ml premium tonic slowly down the side — never stir',
+      'Citrus garnish for London Dry · cucumber for Contemporary · lime for Navy Strength',
+    ],
+    ginStyle: 'Any style — match the tonic and garnish to the gin character.',
+    clientLine: 'When a client orders a G&T without specifying a gin, this is your opening. Ask what they usually drink and match the tonic and garnish to the style. It shows you know the difference.',
+  },
+  {
+    name: 'Martini',
+    style: 'The purist\'s drink',
+    bgColor: '#1A1A3A',
+    accentColor: '#C9A84C',
+    illustration: `<svg width="120" height="200" viewBox="0 0 120 200" fill="none">
+      <!-- Martini glass -->
+      <path d="M20 30 L60 120 L100 30 Z" stroke="rgba(242,239,232,0.25)" stroke-width="1.5" fill="rgba(242,239,232,0.04)"/>
+      <!-- Liquid fill -->
+      <path d="M28 50 L60 118 L92 50 Z" fill="rgba(242,239,232,0.08)"/>
+      <!-- Stem -->
+      <line x1="60" y1="120" x2="60" y2="170" stroke="rgba(242,239,232,0.22)" stroke-width="1.5"/>
+      <!-- Base -->
+      <ellipse cx="60" cy="170" rx="28" ry="5" stroke="rgba(242,239,232,0.18)" stroke-width="1.2" fill="none"/>
+      <!-- Olive -->
+      <circle cx="60" cy="90" r="7" fill="#2A5A20" stroke="rgba(242,239,232,0.2)" stroke-width="1"/>
+      <circle cx="60" cy="90" r="3" fill="#C9A84C" opacity="0.7"/>
+      <!-- Pick -->
+      <line x1="42" y1="75" x2="78" y2="105" stroke="rgba(242,239,232,0.35)" stroke-width="1"/>
+      <!-- Surface shimmer -->
+      <ellipse cx="60" cy="50" rx="30" ry="6" fill="rgba(242,239,232,0.05)" stroke="rgba(242,239,232,0.12)" stroke-width="0.8"/>
+    </svg>`,
+    ingredients: ['60ml London Dry gin', '10ml dry vermouth', 'Ice for stirring', 'Olive or lemon twist'],
+    desc: 'Nothing to hide behind. Cold, precise, and always stirred. The gin has to be exceptional.',
+    howTo: [
+      'Chill a coupe or martini glass with ice water',
+      'Stir 60ml gin with 10ml dry vermouth and ice for 30 seconds',
+      'Strain into the chilled glass',
+      'Garnish: green olive or express lemon peel over the surface',
+    ],
+    ginStyle: 'London Dry — the juniper-forward, crisp character is essential. Tanqueray, Beefeater, or Sipsmith.',
+    clientLine: 'A client who orders a martini knows what they want. Match their precision — ask stirred or shaken, olive or twist. Then recommend the gin. Don\'t overpromise.',
+  },
+  {
+    name: 'Gimlet',
+    style: 'Fresh and sharp',
+    bgColor: '#1A3A1A',
+    accentColor: '#C9A84C',
+    illustration: `<svg width="120" height="200" viewBox="0 0 120 200" fill="none">
+      <!-- Coupe glass -->
+      <path d="M25 40 C25 40 15 80 20 100 C25 115 40 122 60 122 C80 122 95 115 100 100 C105 80 95 40 95 40 Z"
+        stroke="rgba(242,239,232,0.25)" stroke-width="1.5" fill="rgba(242,239,232,0.04)"/>
+      <!-- Liquid -->
+      <path d="M28 55 C28 55 20 85 24 100 C28 112 42 118 60 118 C78 118 92 112 96 100 C100 85 92 55 92 55 Z"
+        fill="rgba(100,180,80,0.18)"/>
+      <!-- Stem -->
+      <line x1="60" y1="122" x2="60" y2="170" stroke="rgba(242,239,232,0.2)" stroke-width="1.5"/>
+      <!-- Base -->
+      <ellipse cx="60" cy="170" rx="26" ry="4.5" stroke="rgba(242,239,232,0.16)" stroke-width="1.2" fill="none"/>
+      <!-- Lime wheel -->
+      <circle cx="88" cy="46" rx="16" ry="16" fill="#3A7A2A" stroke="rgba(242,239,232,0.2)" stroke-width="1" opacity="0.85"/>
+      <circle cx="88" cy="46" rx="9" ry="9" fill="#4A9A3A" opacity="0.7"/>
+      <circle cx="88" cy="46" rx="3" ry="3" fill="rgba(242,239,232,0.2)"/>
+      <line x1="88" y1="30" x2="88" y2="62" stroke="rgba(242,239,232,0.15)" stroke-width="0.8"/>
+      <line x1="72" y1="46" x2="104" y2="46" stroke="rgba(242,239,232,0.12)" stroke-width="0.8"/>
+      <!-- Surface shimmer -->
+      <ellipse cx="60" cy="56" rx="30" ry="6" fill="rgba(200,240,180,0.06)" stroke="rgba(200,240,180,0.1)" stroke-width="0.8"/>
+    </svg>`,
+    ingredients: ['50ml Contemporary gin', '25ml fresh lime juice', '15ml simple syrup', 'Ice'],
+    desc: 'Where Contemporary gin really shines. Fresh lime amplifies floral and botanical profiles without overpowering them.',
+    howTo: [
+      'Add gin, lime juice, and syrup to a shaker with ice',
+      'Shake hard for 10 seconds',
+      'Double strain into a chilled coupe',
+      'Garnish with a lime wheel on the rim',
+    ],
+    ginStyle: 'Contemporary / New Western — Hendrick\'s, The Botanist, or Monkey 47 all work beautifully.',
+    clientLine: 'For a client who says they like gin but finds it too sharp — this is the bridge drink. Fresh, approachable, and still gin-forward. Let them discover it.',
+  },
+  {
+    name: 'The Social Butterfly',
+    style: 'The showstopper',
+    bgColor: '#1A1A4A',
+    accentColor: '#D4688A',
+    illustration: `<svg width="120" height="200" viewBox="0 0 120 200" fill="none">
+      <!-- Balloon glass -->
+      <path d="M25 50 C15 90 18 140 30 162 C40 178 80 178 90 162 C102 140 105 90 95 50 Z"
+        stroke="rgba(242,239,232,0.22)" stroke-width="1.5" fill="rgba(242,239,232,0.03)"/>
+      <!-- Liquid — deep indigo before citrus -->
+      <path d="M28 70 C20 105 22 140 32 158 C41 172 79 172 88 158 C98 140 100 105 92 70 Z"
+        fill="rgba(40,30,100,0.75)"/>
+      <!-- Colour shift hint — pink at bottom simulating pH reaction -->
+      <path d="M32 140 C34 155 41 168 60 171 C79 168 86 155 88 140 Z"
+        fill="rgba(180,50,100,0.45)"/>
+      <!-- Ice -->
+      <rect x="36" y="82" width="20" height="20" rx="3" fill="rgba(242,239,232,0.12)" stroke="rgba(242,239,232,0.18)" stroke-width="1"/>
+      <rect x="62" y="90" width="18" height="18" rx="3" fill="rgba(242,239,232,0.1)" stroke="rgba(242,239,232,0.15)" stroke-width="1"/>
+      <!-- Bubbles -->
+      <circle cx="50" cy="130" r="1.8" fill="rgba(242,239,232,0.2)"/>
+      <circle cx="70" cy="118" r="1.4" fill="rgba(242,239,232,0.15)"/>
+      <circle cx="58" cy="145" r="1.5" fill="rgba(242,239,232,0.18)"/>
+      <!-- Stem -->
+      <line x1="60" y1="178" x2="60" y2="188" stroke="rgba(242,239,232,0.18)" stroke-width="1.5"/>
+      <ellipse cx="60" cy="188" rx="20" ry="3.5" stroke="rgba(242,239,232,0.14)" stroke-width="1" fill="none"/>
+      <!-- Lemon wedge garnish -->
+      <path d="M80 44 C80 36 92 32 98 38 C104 44 100 56 92 56 Z"
+        fill="#D4B830" stroke="rgba(242,239,232,0.2)" stroke-width="1"/>
+      <path d="M80 44 C84 38 92 36 98 38" stroke="rgba(242,239,232,0.2)" stroke-width="0.8" fill="none"/>
+    </svg>`,
+    ingredients: ['50ml butterfly pea flower gin', '150ml premium tonic', 'Large ice cubes', 'Lemon wedge'],
+    desc: 'A demonstration as much as a drink. The gin arrives deep blue-indigo. The lemon changes everything.',
+    howTo: [
+      'Fill a balloon glass with large ice cubes',
+      'Pour 50ml butterfly pea flower gin',
+      'Add 150ml premium tonic slowly down the side',
+      'Hand the lemon wedge to the client — let them add it',
+      'Watch: blue becomes violet, violet becomes pink',
+    ],
+    ginStyle: 'Butterfly pea flower gin — Empress 1908, Malfy Rosa, or any butterfly pea infused expression.',
+    clientLine: 'Say nothing. Build it in front of them. Hand them the lemon. Let the drink explain itself.',
+  },
+];
+
+// Build cards
+const grid = document.getElementById('grid');
+cocktails.forEach(c => {
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.setAttribute('tabindex', '0');
+  card.setAttribute('role', 'button');
+  card.setAttribute('aria-label', c.name);
+  card.innerHTML = `
+    <div class="card-image" style="background:${c.bgColor};">
+      ${c.illustration}
+    </div>
+    <div class="card-footer">
+      <div class="card-name">${c.name}</div>
+      <div class="card-style">${c.style}</div>
+    </div>
+  `;
+  card.addEventListener('click', () => openCocktail(c));
+  card.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ' ') { openCocktail(c); e.preventDefault(); }
+  });
+  grid.appendChild(card);
+});
+
+function openCocktail(c) {
+  document.getElementById('modalImage').style.background = c.bgColor;
+  document.getElementById('modalImage').innerHTML = `<div style="transform:scale(1.4);">${c.illustration}</div>`;
+  document.getElementById('modalContent').innerHTML = `
+    <div class="m-eyebrow">${c.style}</div>
+    <div class="m-title">${c.name}</div>
+    <div class="m-style">${c.ginStyle}</div>
+    <div class="m-rule"></div>
+    <div class="m-label">What it is</div>
+    <div class="m-val">${c.desc}</div>
+    <div class="m-label">How to build it</div>
+    <ol style="margin:0;padding-left:16px;display:flex;flex-direction:column;gap:6px;">
+      ${c.howTo.map(s => `<li style="font-family:'IM Fell English',serif;font-size:0.82rem;color:#0D1F1A;line-height:1.55;">${s}</li>`).join('')}
+    </ol>
+    <div class="m-label">Ingredients</div>
+    <div class="m-ingredients">${c.ingredients.map(i => `<span class="ingredient-tag">${i}</span>`).join('')}</div>
+    <div class="m-label">The moment</div>
+    <div class="m-val italic">${c.clientLine}</div>
+  `;
+  document.getElementById('overlay').classList.add('visible');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  document.getElementById('overlay').classList.remove('visible');
+  document.body.style.overflow = '';
+}
+
+document.getElementById('overlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('overlay')) closeModal();
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+</script>
+</body>
+</html>
