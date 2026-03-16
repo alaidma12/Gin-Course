@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Client Conversation</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=Inter:wght@400;500;600;700&display=swap');
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'IM Fell English', serif;
+  background: #0D1F1A;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 32px;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(ellipse at 20% 30%, rgba(201,168,76,0.04) 0%, transparent 50%),
+              radial-gradient(ellipse at 80% 70%, rgba(201,168,76,0.03) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+.container {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 680px;
+}
+
+.progress {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 40px;
+}
+
+.pip {
+  width: 28px;
+  height: 3px;
+  border-radius: 2px;
+  background: rgba(242,239,232,0.15);
+  transition: background 0.3s ease;
+}
+.pip.active { background: #C9A84C; }
+.pip.done { background: rgba(201,168,76,0.4); }
+
+.card {
+  background: #F2EFE8;
+  border-radius: 10px;
+  overflow: hidden;
+  position: relative;
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(0deg, transparent, transparent 28px, rgba(58,84,56,0.04) 28px, rgba(58,84,56,0.04) 29px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.card-inner {
+  position: relative;
+  z-index: 1;
+  padding: 40px 44px 36px;
+}
+
+.scenario-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.scenario-num {
+  font-family: 'IM Fell English', serif;
+  font-style: italic;
+  font-size: 0.7rem;
+  color: #C9A84C;
+  opacity: 0.65;
+}
+
+.scenario-label {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.46rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #A8502A;
+  opacity: 0.6;
+}
+
+.scenario-title {
+  font-family: 'IM Fell English', serif;
+  font-size: 1.5rem;
+  color: #0D1F1A;
+  margin-bottom: 16px;
+  line-height: 1.2;
+}
+
+.rule {
+  height: 1px;
+  background: rgba(201,168,76,0.3);
+  margin-bottom: 20px;
+}
+
+.block-label {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.44rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #3A5438;
+  opacity: 0.55;
+  margin-bottom: 8px;
+}
+
+.situation-text {
+  font-family: 'IM Fell English', serif;
+  font-style: italic;
+  font-size: 0.88rem;
+  color: #0D1F1A;
+  line-height: 1.75;
+  margin-bottom: 28px;
+}
+
+.question-text {
+  font-family: 'IM Fell English', serif;
+  font-size: 0.92rem;
+  color: #0D1F1A;
+  line-height: 1.6;
+  margin-bottom: 16px;
+}
+
+.choices {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.choice-btn {
+  background: rgba(13,31,26,0.06);
+  border: 1.5px solid rgba(13,31,26,0.12);
+  border-radius: 6px;
+  padding: 14px 18px;
+  text-align: left;
+  cursor: pointer;
+  font-family: 'IM Fell English', serif;
+  font-size: 0.84rem;
+  color: #0D1F1A;
+  line-height: 1.5;
+  transition: background 0.2s ease, border-color 0.2s ease;
+  outline: none;
+}
+
+.choice-btn:hover:not(:disabled) {
+  background: rgba(13,31,26,0.1);
+  border-color: rgba(13,31,26,0.22);
+}
+
+.choice-btn:disabled { cursor: default; }
+.choice-btn.selected-close { background: rgba(90,122,84,0.1); border-color: #5A7A54; }
+.choice-btn.selected-off { background: rgba(168,80,42,0.08); border-color: rgba(168,80,42,0.3); opacity: 0.6; }
+.choice-btn.selected-best { background: rgba(201,168,76,0.12); border-color: #C9A84C; }
+
+.feedback-block {
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: max-height 0.4s ease, opacity 0.3s ease;
+}
+
+.feedback-block.visible {
+  max-height: 160px;
+  opacity: 1;
+  margin-top: 16px;
+}
+
+.feedback-inner {
+  border-radius: 6px;
+  padding: 14px 16px;
+  font-family: 'IM Fell English', serif;
+  font-style: italic;
+  font-size: 0.82rem;
+  line-height: 1.65;
+  color: #0D1F1A;
+}
+
+.feedback-inner.close { background: rgba(90,122,84,0.1); border-left: 3px solid #5A7A54; }
+.feedback-inner.off { background: rgba(168,80,42,0.07); border-left: 3px solid #A8502A; }
+.feedback-inner.best { background: rgba(201,168,76,0.1); border-left: 3px solid #C9A84C; }
+
+.move-block {
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: max-height 0.5s ease, opacity 0.4s ease;
+}
+
+.move-block.visible {
+  max-height: 400px;
+  opacity: 1;
+  margin-top: 24px;
+}
+
+.move-divider {
+  height: 1px;
+  background: rgba(201,168,76,0.25);
+  margin-bottom: 20px;
+}
+
+.move-text {
+  font-family: 'IM Fell English', serif;
+  font-size: 0.88rem;
+  color: #0D1F1A;
+  line-height: 1.75;
+  margin-bottom: 16px;
+}
+
+.move-line {
+  background: rgba(13,31,26,0.05);
+  border-left: 3px solid #A8502A;
+  border-radius: 0 4px 4px 0;
+  padding: 12px 16px;
+  font-family: 'IM Fell English', serif;
+  font-style: italic;
+  font-size: 0.88rem;
+  color: #0D1F1A;
+  line-height: 1.6;
+  margin-bottom: 24px;
+}
+
+.btn-next {
+  width: 100%;
+  padding: 14px 24px;
+  background: #0D1F1A;
+  color: #F2EFE8;
+  border: none;
+  border-radius: 4px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.5rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease, background 0.2s ease;
+}
+
+.btn-next.visible { opacity: 1; pointer-events: auto; }
+.btn-next:hover { background: #132318; }
+
+.done-state {
+  display: none;
+  text-align: center;
+  padding: 48px 44px;
+  position: relative;
+  z-index: 1;
+}
+
+.done-state.visible { display: block; }
+.done-icon { margin-bottom: 20px; }
+
+.done-title {
+  font-family: 'IM Fell English', serif;
+  font-size: 1.3rem;
+  color: #0D1F1A;
+  margin-bottom: 12px;
+}
+
+.done-text {
+  font-family: 'IM Fell English', serif;
+  font-style: italic;
+  font-size: 0.84rem;
+  color: #3A5438;
+  line-height: 1.75;
+  margin-bottom: 28px;
+  opacity: 0.8;
+}
+
+.btn-restart {
+  padding: 12px 28px;
+  background: #0D1F1A;
+  color: #F2EFE8;
+  border: none;
+  border-radius: 4px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.5rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.btn-restart:hover { background: #132318; }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="progress">
+    <div class="pip active" id="pip0"></div>
+    <div class="pip" id="pip1"></div>
+    <div class="pip" id="pip2"></div>
+  </div>
+
+  <div class="card" id="card">
+    <div class="card-inner" id="cardInner">
+      <div class="scenario-meta">
+        <div class="scenario-num" id="num"></div>
+        <div class="scenario-label">The situation</div>
+      </div>
+      <div class="scenario-title" id="title"></div>
+      <div class="rule"></div>
+      <div class="block-label">What's happening</div>
+      <div class="situation-text" id="situation"></div>
+      <div class="block-label">What do you lead with?</div>
+      <div class="question-text" id="question"></div>
+      <div class="choices" id="choices"></div>
+      <div class="feedback-block" id="feedbackBlock">
+        <div class="feedback-inner" id="feedbackInner"></div>
+      </div>
+      <div class="move-block" id="moveBlock">
+        <div class="move-divider"></div>
+        <div class="block-label">The move</div>
+        <div class="move-text" id="moveText"></div>
+        <div class="move-line" id="moveLine"></div>
+      </div>
+      <button class="btn-next" id="btnNext" onclick="next()"></button>
+    </div>
+
+    <div class="done-state" id="doneState">
+      <div class="done-icon">
+        <svg width="44" height="44" viewBox="0 0 44 44" fill="none">
+          <circle cx="22" cy="22" r="21" stroke="#C9A84C" stroke-width="1.5" opacity="0.4"/>
+          <path d="M13 22L19 28L31 15" stroke="#C9A84C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="done-title">Three situations. Three moves.</div>
+      <div class="done-text">The scenarios change. The principles don't — listen first, lead with what's useful, and let the gin do the talking when the moment arrives.</div>
+      <button class="btn-restart" onclick="restart()">Start again →</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const scenarios = [
+  {
+    num: 'i.',
+    title: 'The Walk-In',
+    situation: 'A beverage director with an established gin program. They know the category. They\'ve heard the pitches before. They\'re not looking to be educated — they\'re looking to be surprised.',
+    question: 'You\'ve just sat down across from them. What do you open with?',
+    choices: [
+      { text: 'Lead with your newest gin — something they probably haven\'t seen yet.', type: 'close', feedback: 'Close — but you\'re still leading with the bottle, not the person. They\'ve seen new gins. What they haven\'t been asked is what\'s missing from their program.' },
+      { text: 'Tell them what\'s been working at other accounts in their area.', type: 'off', feedback: 'This positions you as a reporter, not a partner. Sharing what\'s working elsewhere can come later — it\'s not the opener that builds trust.' },
+      { text: 'Ask what their current gin program is missing.', type: 'best', feedback: 'That\'s the move. You\'re not pitching yet — you\'re listening. Let them tell you the gap before you offer the solution.' },
+    ],
+    move: 'Don\'t lead with the gin. Lead with a gap. Ask what their current program is missing — a style, a story, a serve. Let them tell you what they need before you offer what you have. You\'re not pitching a bottle. You\'re solving a problem they\'ve already identified.',
+    line: '"What\'s the one gin conversation your staff can\'t have yet?"',
+  },
+  {
+    num: 'ii.',
+    title: 'The Curious Client',
+    situation: 'A client says their customers "don\'t really like gin." What they mean is London Dry. They\'ve never considered that someone who orders a fruity spritz might already be a gin drinker — they just haven\'t found the right bottle.',
+    question: 'How do you respond?',
+    choices: [
+      { text: 'Recommend a Contemporary gin and explain why it\'s nothing like London Dry.', type: 'close', feedback: 'You\'re on the right track — but you\'ve jumped to the solution before understanding the customer. Ask first, then recommend.' },
+      { text: 'Ask what their customers do tend to order.', type: 'best', feedback: 'Exactly. Once you know what they already like, you can map it to a gin style. You\'re not converting anyone — you\'re showing them what they were already reaching for.' },
+      { text: 'Reassure them that gin is more approachable than people think.', type: 'off', feedback: 'This puts you in the position of defending a category rather than solving their problem. It\'s passive — and it doesn\'t move the conversation anywhere useful.' },
+    ],
+    move: 'Reframe the category. Ask what those customers do order — something floral, something citrus-forward, something light. Then map that to a Contemporary or flavoured gin. You\'re not converting them to gin. You\'re showing them they were already there.',
+    line: '"They like gin. They just don\'t know it yet."',
+  },
+  {
+    num: 'iii.',
+    title: 'The Tableside Moment',
+    situation: 'A client is watching The Social Butterfly for the first time. The lemon hits. The colour shifts from blue to pink. The table goes quiet. Someone asks what just happened.',
+    question: 'What do you say?',
+    choices: [
+      { text: 'Walk them through the full science — anthocyanins, pH levels, the butterfly pea flower origin.', type: 'off', feedback: 'Too much, too fast. The moment is the hook — don\'t explain it to death. One good sentence is all it takes.' },
+      { text: 'Say nothing. Let them ask more if they want to.', type: 'close', feedback: 'Better than over-explaining — but you\'re leaving an opening on the table. One sentence turns curiosity into a real conversation.' },
+      { text: 'Give them one sentence — the flower, the pH — and let the curiosity do the rest.', type: 'best', feedback: 'That\'s it. The drink has already done the work. Your job is one good sentence that makes the science feel like a story, not a lecture.' },
+    ],
+    move: 'Don\'t explain it all at once. Give them one good sentence — the flower, the pH, the fact that it\'s chemistry not a trick. Let the curiosity do the rest. If they want more, they\'ll ask. And when they do, you have the whole story ready.',
+    line: '"It\'s a butterfly pea flower. The citrus changes the pH — and the colour follows."',
+  },
+];
+
+let current = 0;
+let chosen = false;
+
+function render() {
+  const s = scenarios[current];
+  chosen = false;
+
+  document.getElementById('num').textContent = s.num;
+  document.getElementById('title').textContent = s.title;
+  document.getElementById('situation').textContent = s.situation;
+  document.getElementById('question').textContent = s.question;
+  document.getElementById('moveText').textContent = s.move;
+  document.getElementById('moveLine').textContent = s.line;
+
+  const choicesEl = document.getElementById('choices');
+  choicesEl.innerHTML = '';
+  s.choices.forEach((c, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.textContent = c.text;
+    btn.setAttribute('tabindex', '0');
+    btn.onclick = () => choose(i);
+    choicesEl.appendChild(btn);
+  });
+
+  document.getElementById('feedbackBlock').classList.remove('visible');
+  document.getElementById('moveBlock').classList.remove('visible');
+  document.getElementById('btnNext').classList.remove('visible');
+  document.getElementById('btnNext').textContent = current < scenarios.length - 1 ? 'Next scenario →' : 'Finish →';
+
+  scenarios.forEach((_, i) => {
+    const pip = document.getElementById(`pip${i}`);
+    pip.className = 'pip' + (i < current ? ' done' : i === current ? ' active' : '');
+  });
+
+  document.getElementById('cardInner').style.display = 'block';
+  document.getElementById('doneState').classList.remove('visible');
+}
+
+function choose(idx) {
+  if (chosen) return;
+  chosen = true;
+
+  const s = scenarios[current];
+  const choice = s.choices[idx];
+
+  document.querySelectorAll('.choice-btn').forEach((btn, i) => {
+    btn.disabled = true;
+    if (i === idx) btn.classList.add(`selected-${choice.type}`);
+  });
+
+  const fb = document.getElementById('feedbackInner');
+  fb.className = `feedback-inner ${choice.type}`;
+  fb.textContent = choice.feedback;
+  document.getElementById('feedbackBlock').classList.add('visible');
+
+  setTimeout(() => {
+    document.getElementById('moveBlock').classList.add('visible');
+    setTimeout(() => {
+      document.getElementById('btnNext').classList.add('visible');
+    }, 300);
+  }, 600);
+}
+
+function next() {
+  if (current < scenarios.length - 1) {
+    current++;
+    render();
+  } else {
+    document.getElementById('cardInner').style.display = 'none';
+    document.getElementById('doneState').classList.add('visible');
+    scenarios.forEach((_, i) => {
+      document.getElementById(`pip${i}`).className = 'pip done';
+    });
+  }
+}
+
+function restart() {
+  current = 0;
+  render();
+}
+
+render();
+</script>
+</body>
+</html>
