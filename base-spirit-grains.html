@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Base Spirit Grains — The Genus Gin</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=Inter:wght@400;500;600;700&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #F5F1EC;
+    --dark: #0D1F1A;
+    --text: #1A2B1A;
+    --text-secondary: #3D5242;
+    --accent: #A8502A;
+    --gold: #C9A84C;
+    --border: #D8D4C8;
+  }
+
+  html, body { background: var(--bg); font-family: 'Inter', sans-serif; color: var(--text); }
+  body { padding: 20px 20px 28px; max-width: 680px; margin: 0 auto; }
+
+  .hint {
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    opacity: 0.75;
+    text-align: center;
+    margin-bottom: 16px;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+
+  .card-wrap {
+    perspective: 1000px;
+    height: 230px;
+    cursor: pointer;
+  }
+
+  .card-wrap:focus {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+    border-radius: 14px;
+  }
+
+  .card-inner {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 14px;
+  }
+
+  .card-wrap.flipped .card-inner { transform: rotateY(180deg); }
+
+  .card-front, .card-back {
+    position: absolute;
+    inset: 0;
+    border-radius: 14px;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    overflow: hidden;
+  }
+
+  .card-front {
+    background: #F2EDE3;
+    border: 1.5px solid var(--border);
+    display: flex;
+    flex-direction: row;
+  }
+
+  .card-front svg.botanical {
+    width: 54%;
+    height: 100%;
+    flex-shrink: 0;
+    display: block;
+    border-right: 1px solid var(--border);
+  }
+
+  .card-label-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 16px 12px 16px 14px;
+    gap: 5px;
+    position: relative;
+  }
+
+  .grain-name-front {
+    font-family: 'IM Fell English', serif;
+    font-size: 1.05rem;
+    color: var(--dark);
+    line-height: 1.2;
+  }
+
+  .grain-latin {
+    font-family: 'IM Fell English', serif;
+    font-style: italic;
+    font-size: 0.66rem;
+    color: var(--text-secondary);
+    opacity: 0.65;
+    line-height: 1.4;
+  }
+
+  .flip-btn {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 1.5px solid var(--border);
+    background: rgba(242,237,227,0.95);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .flip-btn::before,
+  .flip-btn::after {
+    content: '';
+    position: absolute;
+    background: var(--accent);
+    border-radius: 1px;
+    opacity: 0.8;
+  }
+  .flip-btn::before { width: 9px; height: 1.5px; }
+  .flip-btn::after  { width: 1.5px; height: 9px; }
+
+  .card-back {
+    background: var(--dark);
+    transform: rotateY(180deg);
+    display: flex;
+    flex-direction: column;
+    padding: 20px 18px 18px;
+    position: relative;
+  }
+
+  .card-back::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg, transparent, transparent 24px,
+      rgba(201,168,76,0.05) 24px, rgba(201,168,76,0.05) 25px
+    );
+    pointer-events: none;
+    border-radius: 14px;
+  }
+
+  .flip-btn-back {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(201,168,76,0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .flip-btn-back::before {
+    content: '';
+    position: absolute;
+    width: 9px;
+    height: 1.5px;
+    background: var(--gold);
+    opacity: 0.5;
+    border-radius: 1px;
+  }
+
+  .back-label {
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--gold);
+    opacity: 0.6;
+    margin-bottom: 8px;
+    position: relative;
+  }
+
+  .grain-name-back {
+    font-family: 'IM Fell English', serif;
+    font-size: 1.15rem;
+    color: #F2EFE8;
+    margin-bottom: 4px;
+    line-height: 1.2;
+    position: relative;
+  }
+
+  .grain-character-back {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 12px;
+    position: relative;
+  }
+
+  .grain-body-back {
+    font-size: 0.83rem;
+    line-height: 1.7;
+    color: rgba(242,239,232,0.82);
+    flex: 1;
+    position: relative;
+  }
+
+  @media (max-width: 480px) {
+    .grid { grid-template-columns: 1fr; }
+    .card-wrap { height: 210px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hint">Select a grain to reveal its character</div>
+
+<div class="grid">
+
+  <!-- WHEAT -->
+  <div class="card-wrap" tabindex="0" role="button" aria-label="Wheat — select to reveal" onclick="flip(this)" onkeydown="if(event.key==='Enter'||event.key===' ')flip(this)">
+    <div class="card-inner">
+      <div class="card-front">
+        <svg class="botanical" viewBox="0 0 100 230" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <line x1="8" y1="205" x2="92" y2="205" stroke="#D8D4C8" stroke-width="0.5" opacity="0.35"/>
+          <line x1="8" y1="218" x2="92" y2="218" stroke="#D8D4C8" stroke-width="0.5" opacity="0.2"/>
+          <line x1="50" y1="220" x2="50" y2="55" stroke="#5A4A28" stroke-width="1.5" stroke-linecap="round"/>
+          <line x1="50" y1="165" x2="34" y2="145" stroke="#5A4A28" stroke-width="1" stroke-linecap="round"/>
+          <line x1="50" y1="148" x2="66" y2="128" stroke="#5A4A28" stroke-width="1" stroke-linecap="round"/>
+          <line x1="50" y1="130" x2="36" y2="113" stroke="#5A4A28" stroke-width="1" stroke-linecap="round"/>
+          <ellipse cx="50" cy="55" rx="5.5" ry="8.5" fill="none" stroke="#5A4A28" stroke-width="1.2"/>
+          <ellipse cx="44" cy="68" rx="5.5" ry="8.5" fill="none" stroke="#5A4A28" stroke-width="1.2"/>
+          <ellipse cx="56" cy="68" rx="5.5" ry="8.5" fill="none" stroke="#5A4A28" stroke-width="1.2"/>
+          <ellipse cx="41" cy="82" rx="5.5" ry="8.5" fill="none" stroke="#5A4A28" stroke-width="1.2"/>
+          <ellipse cx="50" cy="82" rx="5.5" ry="8.5" fill="none" stroke="#5A4A28" stroke-width="1.2"/>
+          <ellipse cx="59" cy="82" rx="5.5" ry="8.5" fill="none" stroke="#5A4A28" stroke-width="1.2"/>
+          <line x1="50" y1="47" x2="48" y2="32" stroke="#5A4A28" stroke-width="0.8" stroke-linecap="round"/>
+          <line x1="44" y1="60" x2="37" y2="45" stroke="#5A4A28" stroke-width="0.8" stroke-linecap="round"/>
+          <line x1="56" y1="60" x2="63" y2="45" stroke="#5A4A28" stroke-width="0.8" stroke-linecap="round"/>
+          <line x1="41" y1="74" x2="33" y2="59" stroke="#5A4A28" stroke-width="0.7" stroke-linecap="round"/>
+          <line x1="59" y1="74" x2="67" y2="59" stroke="#5A4A28" stroke-width="0.7" stroke-linecap="round"/>
+          <path d="M50 157 Q32 144 28 130 Q42 140 50 157Z" fill="none" stroke="#5A4A28" stroke-width="1"/>
+          <path d="M50 140 Q68 127 72 113 Q58 123 50 140Z" fill="none" stroke="#5A4A28" stroke-width="1"/>
+          <path d="M50 220 Q43 228 40 235" stroke="#5A4A28" stroke-width="1" fill="none" stroke-linecap="round"/>
+          <path d="M50 220 Q57 228 60 235" stroke="#5A4A28" stroke-width="1" fill="none" stroke-linecap="round"/>
+          <text font-family="'IM Fell English', Georgia, serif" font-style="italic" font-size="6.5" fill="#A8502A" opacity="0.38" x="63" y="73">Triticum</text>
+          <text font-family="'IM Fell English', Georgia, serif" font-style="italic" font-size="6.5" fill="#A8502A" opacity="0.38" x="63" y="82">aestivum</text>
+        </svg>
+        <div class="card-label-col">
+          <div class="grain-name-front">Wheat</div>
+          <div class="grain-latin">Triticum aestivum</div>
+          <div class="flip-btn" aria-hidden="true"></div>
+        </div>
+      </div>
+      <div class="card-back">
+        <div class="flip-btn-back" aria-hidden="true"></div>
+        <div class="back-label">Base Spirit · Grain</div>
+        <div class="grain-name-back">Wheat</div>
+        <div class="grain-character-back">Soft · Clean · Delicate</div>
+        <div class="grain-body-back">The most common base for premium gin. Produces a light, neutral spirit with a smooth, almost creamy mouthfeel. Lets the botanicals speak clearly without competing.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CORN -->
+  <div class="card-wrap" tabindex="0" role="button" aria-label="Corn — select to reveal" onclick="flip(this)" onkeydown="if(event.key==='Enter'||event.key===' ')flip(this)">
+    <div class="card-inner">
+      <div class="card-front">
+        <svg class="botanical" viewBox="0 0 100 230" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <line x1="8" y1="205" x2="92" y2="205" stroke="#D8D4C8" stroke-width="0.5" opacity="0.35"/>
+          <line x1="8" y1="218" x2="92" y2="218" stroke="#D8D4C8" stroke-width="0.5" opacity="0.2"/>
+          <line x1="50" y1="225" x2="50" y2="45" stroke="#5A4A28" stroke-width="2" stroke-linecap="round"/>
+          <path d="M50 172 Q24 156 16 128 Q36 148 50 172Z" fill="none" stroke="#5A4A28" stroke-width="1.2" stroke-linejoin="round"/>
+          <path d="M50 135 Q76 118 84 90 Q64 110 50 135Z" fill="none" stroke="#5A4A28" stroke-width="1.2" stroke-linejoin="round"/>
+          <path d="M50 98 Q30 80 24 55 Q42 72 50 98Z" fill="none" stroke="#5A4A28" stroke-width="1" stroke-linejoin="round"/>
+          <rect x="39" y="148" width="20" height="38" rx="7" fill="none" stroke="#5A4A28" stroke-width="1.2"/>
+          <line x1="44" y1="153" x2="44" y2="182" stroke="#5A4A28" stroke-width="0.6" opacity="0.5"/>
+          <line x1="49" y1="151" x2="49" y2="184" stroke="#5A4A28" stroke-width="0.6" opacity="0.5"/>
+          <line x1="54" y1="151" x2="54" y2="184" stroke="#5A4A28" stroke-width="0.6" opacity="0.5"/>
+          <line x1="39" y1="158" x2="59" y2="158" stroke="#5A4A28" stroke-width="0.5" opacity="0.4"/>
+          <line x1="39" y1="165" x2="59" y2="165" stroke="#5A4A28" stroke-width="0.5" opacity="0.4"/>
+          <line x1="39" y1="172" x2="59" y2="172" stroke="#5A4A28" stroke-width="0.5" opacity="0.4"/>
+          <line x1="39" y1="179" x2="59" y2="179" stroke="#5A4A28" stroke-width="0.5" opacity="0.4"/>
+          <path d="M47 148 Q47 140 46 133" stroke="#5A4A28" stroke-width="0.7" fill="none" stroke-linecap="round"/>
+          <path d="M50 148 Q50 139 50 131" stroke="#5A4A28" stroke-width="0.7" fill="none" stroke-linecap="round"/>
+          <path d="M53 148 Q54 140 54 133" stroke="#5A4A28" stroke-width="0.7" fill="none" stroke-linecap="round"/>
+          <path d="M50 45 Q47 34 45 24" stroke="#5A4A28" stroke-width="0.8" fill="none" stroke-linecap="round"/>
+          <path d="M50 45 Q50 32 50 22" stroke="#5A4A28" stroke-width="0.8" fill="none" stroke-linecap="round"/>
+          <path d="M50 45 Q53 34 55 24" stroke="#5A4A28" stroke-width="0.8" fill="none" stroke-linecap="round"/>
+          <path d="M50 225 Q43 233 40 240" stroke="#5A4A28" stroke-width="1" fill="none" stroke-linecap="round"/>
+          <path d="M50 225 Q57 233 60 240" stroke="#5A4A28" stroke-width="1" fill="none" stroke-linecap="round"/>
+          <text font-family="'IM Fell English', Georgia, serif" font-style="italic" font-size="6.5" fill="#A8502A" opacity="0.38" x="62" y="168">Zea</text>
+          <text font-family="'IM Fell English', Georgia, serif" font-style="italic" font-size="6.5" fill="#A8502A" opacity="0.38" x="62" y="177">mays</text>
+        </svg>
+        <div class="card-label-col">
+          <div class="grain-name-front">Corn</div>
+          <div class="grain-latin">Zea mays</div>
+          <div class="flip-btn" aria-hidden="true"></div>
+        </div>
+      </div>
+      <div class="card-back">
+        <div class="flip-btn-back" aria-hidden="true"></div>
+        <div class="back-label">Base Spirit · Grain</div>
+        <div class="grain-name-back">Corn</div>
+        <div class="grain-character-back">Sweet · Full · Rounded</div>
+        <div class="grain-body-back">Produces a slightly sweeter neutral spirit with more body. Common in American and some contemporary styles. Adds weight without heaviness — the sweetness is subtle but present.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BARLEY -->
+  <div class="card-wrap" tabindex="0" role="button" aria-label="Barley — select to reveal" onclick="flip(this)" onkeydown="if(event.key==='Enter'||event.key===' ')flip(this)">
+    <div class="card-inner">
+      <div class="card-front">
+        <svg class="botanical" viewBox="0 0 100 230" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <line x1="8" y1="205" x2="92" y2="205" stroke="#D8D4C8" stroke-width="0.5" opacity="0.35"/>
+          <line x1="8" y1="218" x2="92" y2="218" stroke="#D8D4C8" stroke-width="0.5" opacity="0.2"/>
+          <path d="M50 222 Q52 168 48 122 Q46 84 50 50" stroke="#5A4A28" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+          <ellipse cx="40" cy="58" rx="4.5" ry="7.5" fill="none" stroke="#5A4A28" stroke-width="1.1" transform="rotate(-15 40 58)"/>
+          <ellipse cx="38" cy="71" rx="4.5" ry="7.5" fill="none" stroke="#5A4A28" stroke-width="1.1" transform="rotate(-12 38 71)"/>
+          <ellipse cx="38" cy="84" rx="4.5" ry="7.5" fill="none" stroke="#5A4A28" stroke-width="1.1" transform="rotate(-10 38 84)"/>
+          <ellipse cx="40" cy="97" rx="4.5" ry="7.5" fill="none" stroke="#5A4A28" stroke-width="1.1" transform="rotate(-8 40 97)"/>
+          <ellipse cx="60" cy="63" rx="4.5" ry="7.5" fill="none" stroke="#5A4A28" stroke-width="1.1" transform="rotate(15 60 63)"/>
+          <ellipse cx="62" cy="76" rx="4.5" ry="7.5" fill="none" stroke="#5A4A28" stroke-width="1.1" transform="rotate(12 62 76)"/>
+          <ellipse cx="62" cy="89" rx="4.5" ry="7.5" fill="none" stroke="#5A4A28" stroke-width="1.1" transform="rotate(10 62 89)"/>
+          <ellipse cx="60" cy="102" rx="4.5" ry="7.5" fill="none" stroke="#5A4A28" stroke-width="1.1" transform="rotate(8 60 102)"/>
+          <line x1="38" y1="51" x2="28" y2="26" stroke="#5A4A28" stroke-width="0.8" stroke-linecap="round"/>
+          <line x1="40" y1="51" x2="33" y2="25" stroke="#5A4A28" stroke-width="0.8" stroke-linecap="round"/>
+          <line x1="60" y1="56" x2="68" y2="30" stroke="#5A4A28" stroke-width="0.8" stroke-linecap="round"/>
+          <line x1="58" y1="56" x2="64" y2="28" stroke="#5A4A28" stroke-width="0.8" stroke-linecap="round"/>
+          <line x1="36" y1="64" x2="26" y2="40" stroke="#5A4A28" stroke-width="0.7" stroke-linecap="round"/>
+          <line x1="62" y1="69" x2="73" y2="46" stroke="#5A4A28" stroke-width="0.7" stroke-linecap="round"/>
+          <line x1="36" y1="77" x2="25" y2="54" stroke="#5A4A28" stroke-width="0.7" stroke-linecap="round"/>
+          <line x1="62" y1="82" x2="74" y2="61" stroke="#5A4A28" stroke-width="0.7" stroke-linecap="round"/>
+          <line x1="50" y1="50" x2="50" y2="26" stroke="#5A4A28" stroke-width="0.9" stroke-linecap="round"/>
+          <path d="M50 160 Q30 146 24 128 Q40 140 50 160Z" fill="none" stroke="#5A4A28" stroke-width="1"/>
+          <path d="M50 128 Q70 112 76 94 Q60 108 50 128Z" fill="none" stroke="#5A4A28" stroke-width="1"/>
+          <path d="M50 222 Q43 230 40 237" stroke="#5A4A28" stroke-width="1" fill="none" stroke-linecap="round"/>
+          <path d="M50 222 Q57 230 60 237" stroke="#5A4A28" stroke-width="1" fill="none" stroke-linecap="round"/>
+        </svg>
+        <div class="card-label-col">
+          <div class="grain-name-front">Barley</div>
+          <div class="grain-latin">Hordeum vulgare</div>
+          <div class="flip-btn" aria-hidden="true"></div>
+        </div>
+      </div>
+      <div class="card-back">
+        <div class="flip-btn-back" aria-hidden="true"></div>
+        <div class="back-label">Base Spirit · Grain</div>
+        <div class="grain-name-back">Barley</div>
+        <div class="grain-character-back">Malty · Earthy · Substantial</div>
+        <div class="grain-body-back">Brings more character to the base spirit — a subtle maltiness that contributes depth. Used in traditional Genever and some Scottish gins. The most distinctive of the four base grains.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GRAPE -->
+  <div class="card-wrap" tabindex="0" role="button" aria-label="Grape — select to reveal" onclick="flip(this)" onkeydown="if(event.key==='Enter'||event.key===' ')flip(this)">
+    <div class="card-inner">
+      <div class="card-front">
+        <svg class="botanical" viewBox="0 0 100 230" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <line x1="8" y1="205" x2="92" y2="205" stroke="#D8D4C8" stroke-width="0.5" opacity="0.35"/>
+          <line x1="8" y1="218" x2="92" y2="218" stroke="#D8D4C8" stroke-width="0.5" opacity="0.2"/>
+          <path d="M50 220 Q49 196 51 175 Q53 158 50 138 Q47 120 50 95 Q52 76 50 48" stroke="#5A4A28" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+          <path d="M50 138 Q28 124 20 102 Q36 116 50 138Z" fill="none" stroke="#5A4A28" stroke-width="1.2" stroke-linejoin="round"/>
+          <path d="M50 138 Q60 126 62 114" stroke="#5A4A28" stroke-width="0.5" fill="none" opacity="0.4"/>
+          <path d="M50 98 Q72 84 80 62 Q64 76 50 98Z" fill="none" stroke="#5A4A28" stroke-width="1.2" stroke-linejoin="round"/>
+          <path d="M50 98 Q40 86 38 74" stroke="#5A4A28" stroke-width="0.5" fill="none" opacity="0.4"/>
+          <path d="M50 175 Q44 167 50 160 Q56 167 50 175" stroke="#5A4A28" stroke-width="0.8" fill="none"/>
+          <circle cx="50" cy="175" r="6" fill="none" stroke="#5A4A28" stroke-width="1.1"/>
+          <circle cx="42" cy="184" r="6" fill="none" stroke="#5A4A28" stroke-width="1.1"/>
+          <circle cx="58" cy="184" r="6" fill="none" stroke="#5A4A28" stroke-width="1.1"/>
+          <circle cx="36" cy="194" r="5.5" fill="none" stroke="#5A4A28" stroke-width="1"/>
+          <circle cx="50" cy="194" r="5.5" fill="none" stroke="#5A4A28" stroke-width="1"/>
+          <circle cx="64" cy="194" r="5.5" fill="none" stroke="#5A4A28" stroke-width="1"/>
+          <circle cx="43" cy="204" r="5" fill="none" stroke="#5A4A28" stroke-width="1"/>
+          <circle cx="57" cy="204" r="5" fill="none" stroke="#5A4A28" stroke-width="1"/>
+          <circle cx="50" cy="213" r="4.5" fill="none" stroke="#5A4A28" stroke-width="1"/>
+          <path d="M50 48 Q53 38 50 30 Q47 22 50 16" stroke="#5A4A28" stroke-width="0.8" fill="none" stroke-linecap="round"/>
+          <path d="M52 172 Q58 162 65 156 Q62 164 58 166" stroke="#5A4A28" stroke-width="0.8" fill="none" stroke-linecap="round"/>
+          <path d="M48 128 Q36 118 28 110 Q34 120 40 120" stroke="#5A4A28" stroke-width="0.8" fill="none" stroke-linecap="round"/>
+          <text font-family="'IM Fell English', Georgia, serif" font-style="italic" font-size="6.5" fill="#A8502A" opacity="0.38" x="68" y="188">Vitis</text>
+          <text font-family="'IM Fell English', Georgia, serif" font-style="italic" font-size="6.5" fill="#A8502A" opacity="0.38" x="68" y="197">vinifera</text>
+        </svg>
+        <div class="card-label-col">
+          <div class="grain-name-front">Grape</div>
+          <div class="grain-latin">Vitis vinifera</div>
+          <div class="flip-btn" aria-hidden="true"></div>
+        </div>
+      </div>
+      <div class="card-back">
+        <div class="flip-btn-back" aria-hidden="true"></div>
+        <div class="back-label">Base Spirit · Grain</div>
+        <div class="grain-name-back">Grape</div>
+        <div class="grain-character-back">Fruity · Smooth · Distinctive</div>
+        <div class="grain-body-back">A wine-distillate base rather than a grain spirit. Produces a softer, slightly fruity neutral spirit. Used in contemporary and French-style gins — adds a distinctive softness to the mouthfeel.</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  function flip(el) {
+    el.classList.toggle('flipped');
+  }
+</script>
+
+</body>
+</html>
