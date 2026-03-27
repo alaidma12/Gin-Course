@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gin History Timeline</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=Inter:wght@400;500;600;700&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --bg: #F5F1EC;
+    --dark: #0D1F1A;
+    --mid: #132318;
+    --text: #1A2B1A;
+    --text-secondary: #3D5242;
+    --accent: #A8502A;
+    --gold: #C9A84C;
+    --border: #D8D4C8;
+    --sage: #EAF2E8;
+  }
+  html, body {
+    background: var(--bg);
+    font-family: 'Inter', sans-serif;
+    color: var(--text);
+  }
+  body {
+    padding: 28px 24px 36px;
+    max-width: 680px;
+    margin: 0 auto;
+  }
+  .widget-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  .header-rule { flex: 1; height: 1px; background: var(--border); }
+  .header-label {
+    font-family: 'IM Fell English', serif;
+    font-style: italic;
+    font-size: 0.88rem;
+    color: var(--text-secondary);
+    white-space: nowrap;
+  }
+  .header-hint {
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    opacity: 0.75;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  .timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    position: relative;
+  }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 88px;
+    top: 12px;
+    bottom: 12px;
+    width: 1.5px;
+    background: linear-gradient(to bottom, transparent, var(--border) 5%, var(--border) 95%, transparent);
+  }
+  .entry {
+    display: flex;
+    gap: 0;
+    align-items: flex-start;
+    position: relative;
+    cursor: pointer;
+  }
+  .entry-date-col {
+    width: 88px;
+    flex-shrink: 0;
+    text-align: right;
+    padding-right: 0;
+    padding-top: 6px;
+    padding-bottom: 20px;
+  }
+  .entry-date {
+    font-family: 'IM Fell English', serif;
+    font-size: 1rem;
+    color: var(--accent);
+    line-height: 1.1;
+    transition: color 0.2s;
+  }
+  .entry-place {
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    margin-top: 2px;
+    opacity: 0.7;
+  }
+  .entry-node {
+    flex-shrink: 0;
+    width: 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 8px;
+    position: relative;
+    z-index: 1;
+  }
+  .node-circle {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--bg);
+    border: 2px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.25s;
+    position: relative;
+  }
+  .node-circle::after {
+    content: '';
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--border);
+    transition: all 0.25s;
+  }
+  .entry:hover .node-circle,
+  .entry.active .node-circle {
+    border-color: var(--accent);
+    background: var(--accent);
+  }
+  .entry:hover .node-circle::after,
+  .entry.active .node-circle::after {
+    background: #F2EFE8;
+  }
+  .entry-content {
+    flex: 1;
+    padding-left: 8px;
+    padding-top: 4px;
+    padding-bottom: 20px;
+  }
+  .entry-title {
+    font-family: 'IM Fell English', serif;
+    font-size: 1rem;
+    color: var(--text);
+    line-height: 1.3;
+    transition: color 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .entry:hover .entry-title,
+  .entry.active .entry-title {
+    color: var(--accent);
+  }
+  .expand-icon {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.25s;
+    margin-left: auto;
+    margin-right: 4px;
+  }
+  .expand-icon svg {
+    width: 8px;
+    height: 8px;
+    transition: transform 0.25s;
+  }
+  .expand-icon svg path {
+    stroke: var(--text-secondary);
+    transition: stroke 0.25s;
+  }
+  .entry.active .expand-icon {
+    background: var(--accent);
+  }
+  .entry.active .expand-icon svg {
+    transform: rotate(180deg);
+  }
+  .entry.active .expand-icon svg path {
+    stroke: #F2EFE8;
+  }
+  .specimen-card {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease, opacity 0.3s ease;
+    opacity: 0;
+  }
+  .specimen-card.open {
+    max-height: 600px;
+    opacity: 1;
+  }
+  .specimen-inner {
+    background: var(--dark);
+    border-radius: 10px;
+    padding: 18px 20px;
+    margin-top: 10px;
+    margin-bottom: 8px;
+    position: relative;
+    overflow: hidden;
+  }
+  .specimen-inner::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 22px,
+      rgba(201,168,76,0.05) 22px,
+      rgba(201,168,76,0.05) 23px
+    );
+    pointer-events: none;
+  }
+  .specimen-label {
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--gold);
+    opacity: 0.65;
+    margin-bottom: 8px;
+  }
+  .specimen-body {
+    font-size: 0.86rem;
+    line-height: 1.72;
+    color: rgba(242,239,232,0.88);
+    position: relative;
+  }
+  .specimen-body em {
+    color: var(--gold);
+    font-style: italic;
+  }
+  .dutch-courage-callout {
+    margin-left: 128px;
+    margin-bottom: 16px;
+    margin-top: -8px;
+    background: var(--mid);
+    border-left: 3px solid var(--gold);
+    border-radius: 0 8px 8px 0;
+    padding: 14px 16px;
+    display: none;
+    animation: fadeIn 0.3s ease;
+  }
+  .dutch-courage-callout.show {
+    display: block;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-4px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .dc-label {
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--gold);
+    opacity: 0.75;
+    margin-bottom: 6px;
+  }
+  .dc-body {
+    font-size: 0.84rem;
+    line-height: 1.65;
+    color: rgba(242,239,232,0.85);
+  }
+  .dc-body strong { color: var(--gold); }
+  .specimen-citation {
+    margin-top: 14px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(201,168,76,0.15);
+    font-size: 0.72rem;
+    color: rgba(201,168,76,0.55);
+    font-style: italic;
+    line-height: 1.5;
+  }
+  .ornament-bottom {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 8px;
+    opacity: 0.3;
+  }
+  .ornament-line { flex: 1; height: 1px; background: var(--border); }
+  .ornament-glyph {
+    font-family: 'IM Fell English', serif;
+    font-style: italic;
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+  }
+</style>
+</head>
+<body>
+<div class="header-hint">Select an entry to open the field note</div>
+<div class="timeline" role="list">
+
+  <!-- Entry 1 -->
+  <div class="entry" role="listitem" tabindex="0" aria-expanded="false" onclick="toggle(this, 'e1')" onkeydown="if(event.key==='Enter'||event.key===' ')toggle(this,'e1')">
+    <div class="entry-date-col">
+      <div class="entry-date">c.1269</div>
+      <div class="entry-place">Netherlands</div>
+    </div>
+    <div class="entry-node"><div class="node-circle"></div></div>
+    <div class="entry-content">
+      <div class="entry-title">
+        The Origin
+        <div class="expand-icon"><svg viewBox="0 0 8 8" fill="none"><path d="M1.5 3L4 5.5L6.5 3" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      </div>
+      <div class="specimen-card" id="e1">
+        <div class="specimen-inner">
+          <div class="specimen-label">Field Note · Netherlands · c.1269</div>
+          <div class="specimen-body">Dutch distillers were producing a spirit called <em>jenever</em> — a grain-based alcohol flavored with juniper berries. At the time, juniper wasn't just a flavoring. It was believed to treat kidney ailments, stomach problems, and a general variety of things people didn't have better remedies for yet.<br><br>The name tells the story. <em>Jenever</em> comes from the Dutch word for juniper, from the French <em>genièvre</em>, from the Latin <em>juniperus</em>. Every language, every version of the word — it all comes back to the plant.</div>
+          <div class="specimen-citation">Barnett, R. (2011). The Book of Gin. Grove Press. · EU Regulation 110/2008 on spirit drinks.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Entry 2 -->
+  <div class="entry" role="listitem" tabindex="0" aria-expanded="false" onclick="toggle(this, 'e2')" onkeydown="if(event.key==='Enter'||event.key===' ')toggle(this,'e2')">
+    <div class="entry-date-col">
+      <div class="entry-date">1689</div>
+      <div class="entry-place">England</div>
+    </div>
+    <div class="entry-node"><div class="node-circle"></div></div>
+    <div class="entry-content">
+      <div class="entry-title">
+        Dutch Courage
+        <div class="expand-icon"><svg viewBox="0 0 8 8" fill="none"><path d="M1.5 3L4 5.5L6.5 3" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      </div>
+      <div class="specimen-card" id="e2">
+        <div class="specimen-inner">
+          <div class="specimen-label">Field Note · England · 1689</div>
+          <div class="specimen-body">English soldiers fighting alongside Dutch troops noticed something before battle — the Dutch drank <em>jenever</em>. It seemed to steady the nerves. The English adopted the habit, adopted the spirit, and brought both home when the wars ended.<br><br>When William of Orange became King of England in 1689, he banned the import of French brandy and encouraged domestic distillation from English grain. Almost overnight, the floodgates opened. Anyone could distill. Almost anyone did.</div>
+          <div class="specimen-citation">Barnett, R. (2011). The Book of Gin. Grove Press. · Dillon, P. (2002). The Much-Lamented Death of Madam Geneva. Review.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dutch Courage callout -->
+  <div class="dutch-courage-callout" id="dc-callout">
+    <div class="dc-label">Field Note — Dutch Courage</div>
+    <div class="dc-body"><strong>"Dutch Courage" is a gin story.</strong> English soldiers picked up the habit from Dutch troops who drank <em style="color:rgba(242,239,232,0.7)">jenever</em> before battle. That phrase — and that spirit — crossed the channel together.</div>
+  </div>
+
+  <!-- Entry 3 -->
+  <div class="entry" role="listitem" tabindex="0" aria-expanded="false" onclick="toggle(this, 'e3')" onkeydown="if(event.key==='Enter'||event.key===' ')toggle(this,'e3')">
+    <div class="entry-date-col">
+      <div class="entry-date">1743</div>
+      <div class="entry-place">London</div>
+    </div>
+    <div class="entry-node"><div class="node-circle"></div></div>
+    <div class="entry-content">
+      <div class="entry-title">
+        The Gin Craze
+        <div class="expand-icon"><svg viewBox="0 0 8 8" fill="none"><path d="M1.5 3L4 5.5L6.5 3" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      </div>
+      <div class="specimen-card" id="e3">
+        <div class="specimen-inner">
+          <div class="specimen-label">Field Note · London · 1743</div>
+          <div class="specimen-body">By 1743, London was consuming 10 litres of gin per person per year — men, women, and children included. Gin was cheap, unregulated, and available almost everywhere.<br><br>Parliament tried to slow things down with the 1736 Gin Act — extortionate license fees, heavy taxes on gin shops. It didn't work. Only two licenses were officially taken out. Production went underground instead, with bootleggers making gin in their own homes. That's where the phrase <em>bathtub gin</em> comes from.<br><br>The 1751 Gin Act took a different approach — lower fees, but distillers had to sell only to licensed retailers. A poor harvest that same year pushed grain prices up, which pushed gin prices up with them, putting it out of reach of the lower classes. By 1757 the craze was over. What remained was a trade that had started, slowly, to take quality seriously.<br><br>William Hogarth's engraving <em>Gin Lane</em> — depicting the city at its worst — was published in 1751, right at the turning point. It remains the defining image of the era.</div>
+          <div class="specimen-citation">Dillon, P. (2002). The Much-Lamented Death of Madam Geneva. Review. · Hogarth, W. (1751). Gin Lane [engraving]. · Barnett, R. (2011). The Book of Gin. Grove Press.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Entry 4 -->
+  <div class="entry" role="listitem" tabindex="0" aria-expanded="false" onclick="toggle(this, 'e4')" onkeydown="if(event.key==='Enter'||event.key===' ')toggle(this,'e4')">
+    <div class="entry-date-col">
+      <div class="entry-date">19th C</div>
+      <div class="entry-place">British India</div>
+    </div>
+    <div class="entry-node"><div class="node-circle"></div></div>
+    <div class="entry-content">
+      <div class="entry-title">
+        The Gin &amp; Tonic
+        <div class="expand-icon"><svg viewBox="0 0 8 8" fill="none"><path d="M1.5 3L4 5.5L6.5 3" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      </div>
+      <div class="specimen-card" id="e4">
+        <div class="specimen-inner">
+          <div class="specimen-label">Field Note · British India · 19th Century</div>
+          <div class="specimen-body">
+            The problem — Malaria<br><br>
+            The treatment — Quinine — effective, deeply bitter<br><br>
+            The solution — Mix with gin rations. Add citrus.<br><br>
+            <em>Medicine became something people looked forward to. The Gin and Tonic was born in the field, not a bar.</em><br><br>
+            <em>It is now one of the most ordered drinks in the world. Every time a beverage director puts a G&amp;T on their menu — they're serving something with more history than most people realize.</em><br><br>
+            <em>That's a story worth telling.</em>
+          </div>
+          <div class="specimen-citation">Barnett, R. (2011). The Book of Gin. Grove Press. · Wondrich, D. (2007). Imbibe! Perigee Books.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Entry 5 -->
+  <div class="entry" role="listitem" tabindex="0" aria-expanded="false" onclick="toggle(this, 'e5')" onkeydown="if(event.key==='Enter'||event.key===' ')toggle(this,'e5')">
+    <div class="entry-date-col">
+      <div class="entry-date">21st C</div>
+      <div class="entry-place">Global</div>
+    </div>
+    <div class="entry-node"><div class="node-circle"></div></div>
+    <div class="entry-content">
+      <div class="entry-title">
+        The Revival
+        <div class="expand-icon"><svg viewBox="0 0 8 8" fill="none"><path d="M1.5 3L4 5.5L6.5 3" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      </div>
+      <div class="specimen-card" id="e5">
+        <div class="specimen-inner">
+          <div class="specimen-label">Field Note · Global · 21st Century</div>
+          <div class="specimen-body">
+            - Gin nearly disappears — outsold by vodka, seen as old-fashioned<br><br>
+            - Early 2000s — craft distilleries begin opening across UK, US, Australia, Japan<br><br>
+            - New botanicals, regional ingredients, Contemporary style emerges<br><br>
+            - Japanese gin introduces an entirely different botanical vocabulary<br><br>
+            - Butterfly pea flower turns gin into a tableside moment<br><br>
+            <em>The category didn't just survive. It reinvented itself.</em><br><br>
+            <em>Today there are over 500 gin distilleries in the UK alone — more variety, more story, and more conversation potential than almost anything else on a back bar.</em>
+          </div>
+          <div class="specimen-citation">The Gin Foundry (2016). The Gin Renaissance. ginfoundry.com · WSET Level 2 Award in Spirits (2022 ed.).</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+<div class="ornament-bottom">
+  <div class="ornament-line"></div>
+  <div class="ornament-glyph">Five centuries · one plant</div>
+  <div class="ornament-line"></div>
+</div>
+<script>
+  function toggle(entry, id) {
+    const card = document.getElementById(id);
+    const isOpen = entry.classList.contains('active');
+    document.querySelectorAll('.entry').forEach(e => {
+      e.classList.remove('active');
+      e.setAttribute('aria-expanded', 'false');
+    });
+    document.querySelectorAll('.specimen-card').forEach(c => c.classList.remove('open'));
+    document.getElementById('dc-callout').classList.remove('show');
+    if (!isOpen) {
+      entry.classList.add('active');
+      entry.setAttribute('aria-expanded', 'true');
+      card.classList.add('open');
+      if (id === 'e2') {
+        document.getElementById('dc-callout').classList.add('show');
+      }
+    }
+  }
+</script>
+</body>
+</html>
